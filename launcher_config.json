@@ -1,6 +1,11 @@
 {
     "comfyui_dir": "D:\\Program\\ComfyUI_Program\\ComfyUI",
     "python_exe": "D:\\Program\\ComfyUI_Program\\python_embeded\\python.exe",
-    "flask_port": "5000",
-    "comfyui_api_port": "8188"
+    "comfyui_workflow_dir": "D:\\Program\\ComfyUI_Program\\ComfyUI\\user\\default\\workflows",
+    "comfyui_api_port": "8188",
+    "fp16_vae": true,
+    "fp8_unet": true,
+    "fp8_textenc": true,
+    "disable_cuda_malloc": false,
+    "vram_mode": "default"
 }

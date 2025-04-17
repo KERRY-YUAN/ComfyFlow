@@ -6,10 +6,21 @@
             "line_draft_loader": "6218", // 线稿加载器节点的ID
             "reference_loader": "2413", // 参考图加载器节点的ID
             "text_prompt": "5544", // 文本提示节点的ID
-            "control_strength": "6047", // 控制强度节点的ID
-            "batch_count": "15", // 批量生成数量节点的ID
+            "control_strength": "1", // 控制强度节点的ID
+            "batch_count": "2", // 批量生成数量节点的ID
             "save_image": "3885"// 保存图像节点的ID
         }
     },
     // Add other workflows here / 在此处添加其他工作流
+    "Flux-Nunchaku_CN": {
+        "description": "FLUX 加速图生图 / FLUX Nunchaku Image-to-Image with ControlNet",
+        "workflow_file": "workflows/Flux-Nunchaku_CN.json",
+        "node_ids": {
+            "line_draft_loader": "1310", // 线稿加载器节点的ID
+            "reference_loader": "1242", // 参考图加载器节点的ID
+            "text_prompt": "1449", // 文本提示节点的ID
+            "control_strength": "1", // 控制强度节点的ID
+            "save_image": "1441"// 保存图像节点的ID
+        }
+    },
 }

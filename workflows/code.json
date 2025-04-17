@@ -1,0 +1,110 @@
+{
+  "3": {
+    "inputs": {
+      "mode": "Image",
+      "value": "",        // VALUE WILL BE SET BY app.py
+      "trigger": 0.0      // TRIGGER WILL BE SET BY app.py
+    },
+    "class_type": "NodeBridge_Input",
+    "_meta": {
+      "title": "Bridge Line Draft Input" // TITLE used by app.py
+    }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors" // Choose your checkpoint
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "5": {
+    "inputs": {
+      "mode": "Text",
+      "value": "default prompt", // VALUE WILL BE SET BY app.py
+      "trigger": 0.0           // TRIGGER WILL BE SET BY app.py
+    },
+    "class_type": "NodeBridge_Input",
+    "_meta": {
+      "title": "Bridge Prompt Input" // TITLE used by app.py
+    }
+  },
+   "6": {
+    "inputs": {
+      "text": [ "5", 1 ], // Get text from Bridge Prompt Input
+      "clip": [ "4", 1 ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "CLIP Text Encode (Positive)" }
+  },
+   "7": {
+    "inputs": {
+      "text": "ugly, deformed, text, words",
+      "clip": [ "4", 1 ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "CLIP Text Encode (Negative)" }
+  },
+  "8": {
+    "inputs": {
+       "image": [ "3", 0 ] // Get image from Bridge Line Draft Input
+      ,"vae": [ "4", 2 ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": { "title": "VAE Encode" }
+  },
+   "10": {
+    "inputs": {
+        "add_noise": "enable",
+        "noise_seed": 0,
+        "steps": 25,
+        "cfg": 7,
+        "sampler_name": "euler",
+        "scheduler": "normal",
+        "denoise": 1,
+        "model": [ "4", 0 ],
+        "positive": [ "6", 0 ],
+        "negative": [ "7", 0 ],
+        "latent_image": [ "8", 0 ]
+    },
+    "class_type": "KSampler",
+    "_meta": { "title": "KSampler" }
+  },
+  "11": {
+    "inputs": {
+        "samples": [ "10", 0 ],
+        "vae": [ "4", 2 ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode" }
+  },
+   "12": {
+    "inputs": {
+      "images": [ "11", 0 ], // Get image from VAE Decode
+      "filename_prefix": "WebApp_Output"
+    },
+    "class_type": "NodeBridge_Output", // Use the Bridge Output
+    "_meta": {
+      "title": "Bridge Output (Web Result)" // TITLE doesn't matter as much here
+    }
+  },
+  "13": {
+     "inputs": {
+        "mode": "Float",
+        "value": "0.5",    // VALUE WILL BE SET BY app.py
+        "trigger": 0.0     // TRIGGER WILL BE SET BY app.py
+    },
+    "class_type": "NodeBridge_Input",
+    "_meta": { "title": "Bridge Strength Input" } // TITLE used by app.py
+  },
+   "14": {
+     "inputs": {
+        "mode": "Int",
+        "value": "1",     // VALUE WILL BE SET BY app.py
+        "trigger": 0.0    // TRIGGER WILL BE SET BY app.py
+    },
+    "class_type": "NodeBridge_Input",
+    "_meta": { "title": "Bridge Count Input" } // TITLE used by app.py
+  }
+}
