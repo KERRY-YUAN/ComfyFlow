@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/icon.ico" type="image/x-icon">
-    <title>设计工具界面</title> <!-- Removed Bridge -->
+    <!-- Title Updated / 标题已更新 -->
+    <title>设计工具界面</title>
     <style>
         /* --- Base Styles / 基本样式 --- */
         html { height: 100%; font-size: clamp(10px, 1.2vmin, 15px); box-sizing: border-box; }
@@ -12,17 +13,17 @@
         body {
             font-family: system-ui, sans-serif;
             margin: 0;
-            padding: 0 0 2.5rem 0; /* Space for log footer */
+            padding: 0 0 2.5rem 0; /* Space for log footer / 为日志页脚留出空间 */
             background-color: #1e1e1e;
             color: #d4d4d4;
             display: flex;
             min-height: 100vh;
             font-size: 0.9rem;
             line-height: 1.5;
-            overflow: hidden; /* Prevent body scroll */
+            overflow: hidden; /* Prevent body scroll / 防止主体滚动 */
         }
         /* --- Main Layout / 主要布局 --- */
-        .container { display: flex; width: 100%; height: calc(100vh - 2.5rem); /* Adjusted for footer */ padding: 1rem; gap: 1rem; }
+        .container { display: flex; width: 100%; height: calc(100vh - 2.5rem); /* Adjusted for footer / 根据页脚调整 */ padding: 1rem; gap: 1rem; }
         /* --- Left Sidebar / 左侧边栏 --- */
         .sidebar { width: 20rem; flex-shrink: 0; background-color: #2a2a2a; padding: 1rem; display: flex; flex-direction: column; border-radius: 0.3rem; height: 100%; gap: 1rem; }
         .sidebar-content-area { flex-grow: 1; flex-shrink: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; min-height: 0; box-sizing: border-box; scrollbar-width: thin; scrollbar-color: #555 #2a2a2a; }
@@ -65,33 +66,34 @@
         /* --- Right Main Content / 右侧主内容区 --- */
         .main-content { flex-grow: 1; min-width: 20rem; background-color: #2a2a2a; padding: 1rem; display: flex; flex-direction: column; border-radius: 0.3rem; position: relative; overflow: hidden; height: 100%; }
         .title-toolbar-wrapper { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-shrink: 0; padding: 0.6rem 1rem; background-color: #333; border-radius: 0.25rem; }
+        /* Title Updated / 标题已更新 */
         .main-content h2 { margin: 0; padding: 0; background-color: transparent; border-radius: 0; font-size: 1.1rem; font-weight: 600; color: #cccccc; }
-        /* Output Area Styles */
+        /* Output Area Styles / 输出区域样式 */
         .output-area { flex-grow: 1; background-color: #383838; border: 1px solid #444; border-radius: 0.25rem; position: relative; overflow: hidden; min-height: 10rem; cursor: default; }
         .output-placeholder { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; color: #aaa; font-size: 1.1rem; position: absolute; top: 0; left: 0; z-index: 0; text-align: center; padding: 1rem; user-select: none; }
-        /* Output Layer */
-        .output-result-wrapper { position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; z-index: 2; display: none; /* Hide until result is ready */ }
+        /* Output Layer / 输出层 */
+        .output-result-wrapper { position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; z-index: 2; display: none; /* Hide until result is ready / 隐藏直到结果就绪 */ }
         #output-result-layer { width: 100%; height: 100%; display: block; }
         #output-result-layer img { display: block; width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; pointer-events: none; }
 
-        /* Edit Toolbar */
+        /* Edit Toolbar / 编辑工具栏 */
         .local-edit-toolbar { width: auto; height: auto; background-color: transparent; display: flex; flex-direction: row; align-items: center; gap: 0.7rem; flex-shrink: 0; }
         .edit-icon { width: 2.2rem; height: 2.2rem; flex-shrink: 0; background-color: #5a5a5a; border: 1px solid #777; cursor: pointer; border-radius: 0.2rem; display: flex; justify-content: center; align-items: center; color: #ccc; font-size: 0.9rem; font-weight: 600; transition: background-color 0.2s ease, border-color 0.2s ease; }
         .edit-icon:hover { background-color: #6a6a6a; border-color: #999; }
-        /* Output Action Buttons */
+        /* Output Action Buttons / 输出操作按钮 */
         .output-actions { display: flex; align-items: center; justify-content: flex-end; gap: 0.8rem; flex-shrink: 0; padding-top: 1rem; }
         .output-actions button { background-color: #007bff; color: white; }
         .output-actions button:hover { background-color: #0056b3; }
         .version-info-footer { font-size: 0.75rem; color: #5a5a5a; margin-right: auto; align-self: center; padding-left: 0.1rem; user-select: none; }
 
-        /* Status Indicator Styles */
+        /* Status Indicator Styles / 状态指示器样式 */
         #comfyui-status-indicator { position: absolute; top: 1rem; right: 1rem; padding: 0.4rem 0.8rem; background-color: rgba(0, 0, 0, 0.6); color: #b71c1c; font-size: 0.8rem; font-weight: 500; border-radius: 0.2rem; z-index: 10; display: none; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.3s ease, background-color 0.3s ease, opacity 0.5s ease; opacity: 0; }
         #comfyui-status-indicator.visible { display: block; opacity: 1; }
         #comfyui-status-indicator.busy { color: #ffab00; background-color: rgba(80, 60, 0, 0.7); }
         #comfyui-status-indicator.ready { color: #2e7d32; background-color: rgba(46, 125, 50, 0.7); }
         #comfyui-status-indicator.error { color: #ff5252; background-color: rgba(183, 28, 28, 0.7); }
 
-        /* --- Log Footer Styles --- */
+        /* --- Log Footer Styles / 日志页脚样式 --- */
         .log-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #1a1a1a; color: #9a9a9a; padding: 0.4rem 1rem; font-size: 0.8rem; line-height: 1.3; z-index: 100; box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.3); box-sizing: border-box; height: 2.5rem; display: flex; align-items: center; }
         #backend-log-display { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace; width: 100%; }
         #backend-log-display.disconnected { color: #ff6b6b; font-style: italic; }
@@ -125,7 +127,7 @@
                 </div>
                 <!-- Uploads and Prompt -->
                 <div class="flexible-content">
-                    <!-- Removed "(桥接 / Bridge)" from title -->
+                    <!-- Title Updated / 标题已更新 -->
                     <div class="sidebar-section upload-section"> <h3>上传线稿</h3> <div class="upload-box" id="line-draft-upload-area"> <span class="plus-sign">+</span> <img src="" alt="Line Draft Preview" class="preview-image" id="line-draft-preview"> <input type="file" id="line-draft-input" accept="image/*" title="点击上传线稿"> </div> </div>
                     <div class="sidebar-section upload-section"> <h3>上传参考</h3> <div class="upload-box" id="reference-upload-area"> <span class="plus-sign">+</span> <img src="" alt="Reference Preview" class="preview-image" id="reference-preview"> <input type="file" id="reference-input" accept="image/*" title="点击上传参考图"> </div> </div>
                     <div class="sidebar-section text-prompt"> <h3>文字要求</h3> <textarea id="text-prompt" placeholder="请输入文字要求"></textarea> </div>
@@ -140,7 +142,7 @@
 
         <!-- Right Main Content -->
         <div class="main-content">
-             <!-- Removed "(桥接 / Bridge)" from title -->
+             <!-- Title Updated / 标题已更新 -->
             <div class="title-toolbar-wrapper"> <h2>成果输出</h2> <div class="local-edit-toolbar" id="edit-toolbar"> <div class="edit-icon" title="编辑工具1">1</div><div class="edit-icon" title="编辑工具2">2</div><div class="edit-icon" title="编辑工具3">3</div><div class="edit-icon" title="编辑工具4">4</div><div class="edit-icon" title="编辑工具5">5</div><div class="edit-icon" title="编辑工具6">6</div><div class="edit-icon" title="编辑工具7">7</div><div class="edit-icon" title="编辑工具8">8</div><div class="edit-icon" title="编辑工具9">9</div><div class="edit-icon" title="编辑工具10">10</div> </div> </div>
             <div class="output-area" id="output-display">
                  <span class="output-placeholder">等待生成结果...</span>
@@ -152,7 +154,7 @@
                  </div>
             </div>
             <div class="output-actions">
-                <span class="version-info-footer">Kerry, Ver. 1.5.0</span> <!-- Updated Version -->
+                <span class="version-info-footer">Kerry, Ver. 1.5.0</span> <!-- Updated Version / 版本更新 -->
                 <button id="save-btn">保存</button>
                 <button id="save-large-btn">放大并保存</button>
             </div>
@@ -173,35 +175,36 @@
     let comfyUISocket = null;
     let reconnectTimeout = null;
     let currentPromptId = null;
-    let currentOutputNodeId = null; // ID of the NodeBridge_Output node
+    let currentOutputNodeId = null; // ID of the NodeBridge_Output node / NodeBridge_Output 节点的 ID
 
     // --- Configuration ---
-    const COMFYUI_API_PORT = {{ comfyui_api_port | default(8188) }}; // Get port from Flask template
+    const COMFYUI_API_PORT = {{ comfyui_api_port | default(8188) }}; // Get port from Flask template / 从 Flask 模板获取端口
     const COMFYUI_WS_URL = `ws://${window.location.hostname}:${COMFYUI_API_PORT}/ws`;
     const COMFYUI_VIEW_URL_BASE = `http://${window.location.hostname}:${COMFYUI_API_PORT}/view`;
-    const APP_API_BASE = window.location.origin; // Flask app URL
+    const APP_API_BASE = window.location.origin; // Flask app URL / Flask 应用 URL
 
     // --- Function Definitions ---
 
-    /** Reads file as Data URL */
+    /** Reads file as Data URL / 将文件读取为 Data URL */
     function readFileAsDataURL(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = (error) => reject(error); reader.readAsDataURL(file); }); }
-    /** Checks if image element has valid src */
+    /** Checks if image element has valid src / 检查图像元素是否具有有效的 src */
     function hasValidSrc(imgElement) { return imgElement && imgElement.src && !imgElement.src.endsWith('#') && imgElement.src.length > 10; }
-    /** Updates top-right status indicator */
+    /** Updates top-right status indicator / 更新右上角状态指示器 */
     function updateStatusIndicator(message, type = 'busy') { const indicator = document.getElementById('comfyui-status-indicator'); if (!indicator) return; indicator.textContent = message; indicator.className = 'visible ' + type; if (statusIndicatorTimeout) clearTimeout(statusIndicatorTimeout); const hideDelay = (type === 'ready') ? 5000 : 4000; statusIndicatorTimeout = setTimeout(() => indicator.classList.remove('visible'), hideDelay); }
-    /** Hides top-right status indicator */
+    /** Hides top-right status indicator / 隐藏右上角状态指示器 */
     function hideStatusIndicator() { const indicator = document.getElementById('comfyui-status-indicator'); if (indicator) { if (statusIndicatorTimeout) clearTimeout(statusIndicatorTimeout); indicator.className = ''; } }
-    /** Updates the log footer text and style */
+    /** Updates the log footer text and style / 更新日志页脚文本和样式 */
     function updateFooter(text, statusClass = 'idle') { const display = document.getElementById('backend-log-display'); if (display) { display.textContent = text; const classes = ['idle', 'connecting', 'connected', 'progress', 'disconnected']; display.classList.remove(...classes); if (statusClass) display.classList.add(statusClass); } }
 
     /**
      * NEW: Sends data to the Flask backend to be staged for a specific key.
      * Handles different data types (Image, Text, Float, Int).
-     * @param {string} key - The identifier for this data (e.g., 'current_line_draft').
-     * @param {'Image'|'Text'|'Float'|'Int'} type - The type of data being sent.
-     * @param {File|string|number} value - The data value (File object for Image, string/number otherwise).
-     * @param {HTMLElement} [feedbackElement] - Optional element (like upload-box) to apply status classes.
-     * @returns {Promise<boolean>} - Promise resolving to true on success, false on failure.
+     * 新增：将数据发送到 Flask 后端以暂存特定键。处理不同的数据类型 (Image, Text, Float, Int)。
+     * @param {string} key - The identifier for this data (e.g., 'current_line_draft'). / 此数据的标识符（例如，'current_line_draft'）。
+     * @param {'Image'|'Text'|'Float'|'Int'} type - The type of data being sent. / 发送的数据类型。
+     * @param {File|string|number} value - The data value (File object for Image, string/number otherwise). / 数据值（图像为 File 对象，否则为字符串/数字）。
+     * @param {HTMLElement} [feedbackElement] - Optional element (like upload-box) to apply status classes. / 可选元素（如 upload-box）以应用状态类。
+     * @returns {Promise<boolean>} - Promise resolving to true on success, false on failure. / Promise，成功时解析为 true，失败时解析为 false。
      */
     async function stageData(key, type, value, feedbackElement = null) {
         const formData = new FormData();
@@ -211,7 +214,7 @@
         if (type === 'Image' && value instanceof File) {
             formData.append('image_file', value, value.name);
         } else {
-            formData.append('value', String(value)); // Send other types as string value
+            formData.append('value', String(value)); // Send other types as string value / 其他类型作为字符串值发送
         }
 
         console.log(`Staging data for key: ${key}, type: ${type}`);
@@ -228,61 +231,61 @@
             }
             console.log(`Data staged successfully for key: ${key}. Response:`, result);
             if (feedbackElement) feedbackElement.classList.add('success');
-            return true; // Indicate success
+            return true; // Indicate success / 表示成功
         } catch (error) {
             console.error(`Error staging data for key ${key}:`, error);
             if (feedbackElement) feedbackElement.classList.add('error');
-            // Show error to user (maybe only for images?)
+            // Show error to user (maybe only for images?) / 向用户显示错误（可能仅适用于图像？）
             if (type === 'Image') alert(`暂存图像错误 / Staging Image Error (${key}): ${error.message}`);
-            return false; // Indicate failure
+            return false; // Indicate failure / 表示失败
         }
     }
 
 
-    /** MODIFIED: Sets up preview and triggers staging on change */
+    /** MODIFIED: Sets up preview and triggers staging on change / 修改：设置预览并在更改时触发暂存 */
     function setupInputStaging(inputId, previewId, dataKey, dataType = 'Image') {
         const inputElement = document.getElementById(inputId);
         const imagePreview = previewId ? document.getElementById(previewId) : null;
-        const uploadBox = inputElement ? inputElement.closest('.upload-box') : null; // Needed for visual feedback
+        const uploadBox = inputElement ? inputElement.closest('.upload-box') : null; // Needed for visual feedback / 需要用于视觉反馈
 
         if (!inputElement) { console.error(`Init Error: Missing input element: ${inputId}`); return; }
         if (dataType === 'Image' && !imagePreview) { console.error(`Init Error: Missing preview element for image input: ${previewId}`); return; }
 
-        // Use debounce for non-image inputs to avoid spamming the stage API
-        const debounceWait = 300; // ms delay for staging text/numbers
+        // Use debounce for non-image inputs to avoid spamming the stage API / 对非图像输入使用 debounce 以避免频繁调用暂存 API
+        const debounceWait = 300; // ms delay for staging text/numbers / 暂存文本/数字的毫秒延迟
         const debouncedStageData = debounce(stageData, debounceWait);
 
         inputElement.addEventListener('change', async function(event) {
             let valueToStage = null;
-            let feedbackTarget = uploadBox; // Default feedback element
+            let feedbackTarget = uploadBox; // Default feedback element / 默认反馈元素
 
             if (dataType === 'Image') {
                 const file = event.target.files[0];
-                // Reset UI
+                // Reset UI / 重置 UI
                 if (imagePreview) { imagePreview.src = ''; imagePreview.style.display = 'none'; }
                 if (uploadBox) uploadBox.classList.remove('uploading', 'success', 'error');
 
                 if (file && file.type.startsWith('image/')) {
-                    // Show preview immediately
+                    // Show preview immediately / 立即显示预览
                     try {
                         const imageUrl = await readFileAsDataURL(file);
                         if (imagePreview) { imagePreview.src = imageUrl; imagePreview.style.display = 'block'; }
                     } catch (readError) { console.error("Preview Error:", readError); return; }
-                    // Stage the file directly
-                    stageData(dataKey, 'Image', file, uploadBox); // No debounce for file uploads
+                    // Stage the file directly / 直接暂存文件
+                    stageData(dataKey, 'Image', file, uploadBox); // No debounce for file uploads / 文件上传不使用 debounce
                 }
             } else {
-                // For Text, Float, Int - stage the current value
+                // For Text, Float, Int - stage the current value / 对于 Text, Float, Int - 暂存当前值
                 valueToStage = inputElement.value;
-                feedbackTarget = null; // No specific visual feedback for these usually
-                // Use debounced staging for non-image types
+                feedbackTarget = null; // No specific visual feedback for these usually / 这些通常没有特定的视觉反馈
+                // Use debounced staging for non-image types / 对非图像类型使用 debounced 暂存
                 debouncedStageData(dataKey, dataType, valueToStage, feedbackTarget);
             }
         });
     }
 
 
-    /** Establishes and manages the WebSocket connection directly to ComfyUI. */
+    /** Establishes and manages the WebSocket connection directly to ComfyUI. / 建立并管理直接到 ComfyUI 的 WebSocket 连接。*/
     function connectComfyUIWebSocket() {
         if (comfyUISocket && (comfyUISocket.readyState === WebSocket.OPEN || comfyUISocket.readyState === WebSocket.CONNECTING)) return;
         clearTimeout(reconnectTimeout);
@@ -296,8 +299,8 @@
         comfyUISocket.onclose = (event) => { console.warn(`ComfyUI WS closed. Clean: ${event.wasClean}`); comfyUISocket = null; const message = event.wasClean ? 'ComfyUI 连接已关闭' : 'ComfyUI 连接断开，5秒后重连...'; updateFooter(message, 'disconnected'); if (!event.wasClean) reconnectTimeout = setTimeout(connectComfyUIWebSocket, 5000); };
         comfyUISocket.onerror = (error) => { console.error("ComfyUI WS Error:", error); updateFooter('ComfyUI 连接错误', 'disconnected'); };
 
-        comfyUISocket.onmessage = (event) => { // Message Handling Logic
-            if (event.data instanceof Blob) return; // Ignore binary previews
+        comfyUISocket.onmessage = (event) => { // Message Handling Logic / 消息处理逻辑
+            if (event.data instanceof Blob) return; // Ignore binary previews / 忽略二进制预览
             try {
                 const msg = JSON.parse(event.data);
                 if (msg.type === 'status') {
@@ -310,43 +313,67 @@
                 } else if (msg.type === 'executing') {
                      const executingPromptId = msg.data.prompt_id;
                      if (executingPromptId && (!currentPromptId || currentPromptId === executingPromptId)) currentPromptId = executingPromptId;
+                     // Node is null when execution is complete for the prompt but before 'executed' message fires for the *final* node
+                     // 当提示的执行完成但在 *最终* 节点的 'executed' 消息触发之前，节点为 null
                      else if (currentPromptId === executingPromptId && msg.data.node === null) updateFooter(`完成执行中...`, 'progress');
                 } else if (msg.type === 'progress') {
                     const p = msg.data; const pct = p.max ? ((p.value / p.max) * 100).toFixed(0) : 0;
                     updateFooter(`进度: ${p.value}/${p.max} (${pct}%)`, 'progress');
                 } else if (msg.type === 'executed') {
-                    const promptId = msg.data.prompt_id; console.log(`Execution finished: ${promptId}`);
-                     if (promptId === currentPromptId && currentOutputNodeId) {
-                        updateFooter(`执行完毕`, 'connected');
-                        fetchAndDisplayResults(promptId, currentOutputNodeId); // Pass output node ID
-                        currentPromptId = null; currentOutputNodeId = null; // Clear tracked IDs
+                     const promptId = msg.data.prompt_id;
+                     const executedNodeId = msg.data.node; // The ID of the node that just finished executing / 刚刚执行完毕的节点的 ID
+                     console.log(`Node ${executedNodeId} executed for prompt ${promptId}. Output Node ID we are tracking: ${currentOutputNodeId}`);
+
+                     // Check if the executed node is the specific output node we are waiting for
+                     // 检查执行的节点是否是我们等待的特定输出节点
+                     if (promptId === currentPromptId && executedNodeId && String(executedNodeId) === String(currentOutputNodeId)) {
+                         console.log(`Target output node (${currentOutputNodeId}) finished execution for prompt ${promptId}. Fetching results.`);
+                         updateFooter(`执行完毕，获取结果...`, 'progress'); // Change status before fetching / 获取前更改状态
+                         fetchAndDisplayResults(promptId, currentOutputNodeId); // Pass output node ID / 传递输出节点 ID
+                         currentPromptId = null; currentOutputNodeId = null; // Clear tracked IDs / 清除跟踪的 ID
                      } else if (promptId === currentPromptId) {
-                        console.warn("Execution finished but no output node ID was tracked."); updateFooter(`执行完毕 (无输出节点?)`, 'connected'); currentPromptId = null;
+                         // Another node finished, not the final output node yet, or output node ID wasn't tracked correctly
+                         // 另一个节点已完成，但还不是最终的输出节点，或者输出节点 ID 未正确跟踪
+                         console.log(`Node ${executedNodeId} finished, but not the target output node ${currentOutputNodeId}. Waiting...`);
+                         // Optionally update footer or status here if needed / 如果需要，可在此处更新页脚或状态
                      }
                 }
             } catch (e) { console.error("Error parsing ComfyUI WS message:", e, "\nData:", event.data); }
         };
     }
 
-    /** Fetches history and finds output for specific node ID */
+    /** Fetches history and finds output for specific node ID / 获取历史记录并查找特定节点 ID 的输出 */
     async function fetchAndDisplayResults(promptId, targetOutputNodeId) {
          console.log(`Fetching results for prompt ID: ${promptId}, targeting node: ${targetOutputNodeId}`);
          updateStatusIndicator('正在获取结果...', 'busy');
-         const renderBtn = document.getElementById('render-btn'); // Get button to re-enable later
+         const renderBtn = document.getElementById('render-btn'); // Get button to re-enable later / 获取按钮以便稍后重新启用
+
          try {
+             // Slight delay to allow history to be fully written, might not always be necessary
+             // 稍作延迟以允许历史记录完全写入，可能并非总是必要
              await new Promise(resolve => setTimeout(resolve, 500));
              const response = await fetch(`http://${window.location.hostname}:${COMFYUI_API_PORT}/history/${promptId}`);
-             if (!response.ok) throw new Error(`Failed history fetch: ${response.status}`);
+             if (!response.ok) throw new Error(`获取历史记录失败 / Failed history fetch: ${response.status}`);
              const historyData = await response.json(); console.log("History Data:", historyData);
-             const promptHistory = historyData[promptId];
-             if (!promptHistory || !promptHistory.outputs) throw new Error("No outputs in history.");
 
+             // History data is an object where the key is the prompt ID
+             // 历史数据是一个对象，键是提示 ID
+             const promptHistory = historyData[promptId];
+             if (!promptHistory || !promptHistory.outputs) throw new Error("历史记录中没有输出 / No outputs in history.");
+
+             // Find the output object corresponding to our target node ID
+             // 查找与我们的目标节点 ID 对应的输出对象
              const targetOutput = promptHistory.outputs[targetOutputNodeId];
              if (!targetOutput || !targetOutput.images || targetOutput.images.length === 0) {
-                 console.warn(`No images found in output node ${targetOutputNodeId}`); updateStatusIndicator('完成但未找到指定输出图像', 'ready'); return; }
+                 console.warn(`在输出节点 ${targetOutputNodeId} 中未找到图像 / No images found in output node ${targetOutputNodeId}`);
+                 updateStatusIndicator('完成但未找到指定输出图像', 'ready');
+                 return; // Exit if no images in the target node / 如果目标节点中没有图像则退出
+             }
 
-             const imgInfo = targetOutput.images[0]; // Use first image from the node
-             const resultImageUrl = `${COMFYUI_VIEW_URL_BASE}?filename=${encodeURIComponent(imgInfo.filename)}&type=${imgInfo.type}&subfolder=${encodeURIComponent(imgInfo.subfolder || '')}&t=${Date.now()}`;
+             // Use the first image found in the target node's output
+             // 使用在目标节点输出中找到的第一个图像
+             const imgInfo = targetOutput.images[0];
+             const resultImageUrl = `${COMFYUI_VIEW_URL_BASE}?filename=${encodeURIComponent(imgInfo.filename)}&type=${imgInfo.type}&subfolder=${encodeURIComponent(imgInfo.subfolder || '')}&t=${Date.now()}`; // Add timestamp to prevent caching / 添加时间戳以防止缓存
 
              const outputPlaceholder = document.getElementById('output-display')?.querySelector('.output-placeholder');
              const resultWrapper = document.querySelector('.output-result-wrapper');
@@ -356,13 +383,18 @@
              updateStatusIndicator('渲染完成', 'ready');
 
              if (resultLayerImg && resultWrapper) {
-                 resultLayerImg.src = resultImageUrl; resultWrapper.style.display = 'block'; resultWrapper.style.width = '100%'; console.log("Result image source set:", resultImageUrl);
-             } else { console.error("Result layer/image element not found!"); }
+                 resultLayerImg.src = resultImageUrl;
+                 resultWrapper.style.display = 'block'; // Make the wrapper visible / 使包装器可见
+                 // resultWrapper.style.width = '100%'; // Ensure width is set if needed / 如果需要，确保设置宽度
+                 console.log("Result image source set:", resultImageUrl);
+             } else { console.error("结果图层/图像元素未找到！ / Result layer/image element not found!"); }
 
          } catch (error) {
-             console.error("Error fetching/processing history:", error); updateStatusIndicator('获取结果失败', 'error');
+             console.error("获取/处理历史记录时出错 / Error fetching/processing history:", error);
+             updateStatusIndicator('获取结果失败', 'error');
          } finally {
-              if (renderBtn) { renderBtn.disabled = false; renderBtn.textContent = '渲染'; } // Re-enable button
+              if (renderBtn) { renderBtn.disabled = false; renderBtn.textContent = '渲染'; } // Re-enable button / 重新启用按钮
+              updateFooter('ComfyUI 空闲', 'idle'); // Set footer back to idle after completion or error / 完成或出错后将页脚设置回空闲状态
          }
      }
 
@@ -378,11 +410,11 @@
         const resultLayerImg = resultWrapper?.querySelector('#output-result-layer img');
         const workflowSelect = document.getElementById('workflow-select');
         const renderBtn = document.getElementById('render-btn');
-        const lineDraftInput = document.getElementById('line-draft-input');
-        const referenceInput = document.getElementById('reference-input');
+        const lineDraftInput = document.getElementById('line-draft-input'); // Already used by setupInputStaging
+        const referenceInput = document.getElementById('reference-input'); // Already used by setupInputStaging
         const textPromptInput = document.getElementById('text-prompt');
-        const strengthSlider = document.getElementById('control-strength');
-        const countSlider = document.getElementById('card-count');
+        const controlStrengthSlider = document.getElementById('control-strength'); // Corrected variable name
+        const cardCountSlider = document.getElementById('card-count');             // Corrected variable name
         const controlStrengthValue = document.getElementById('control-strength-value');
         const cardCountValue = document.getElementById('card-count-value');
         const saveBtn = document.getElementById('save-btn');
@@ -396,47 +428,60 @@
 
         // --- Slider Value Display & Staging ---
         if(controlStrengthSlider && controlStrengthValue) {
-            const stageStrength = debounce(() => stageData('current_strength', 'Float', strengthSlider.value), 300);
+            // Stage initial value
+            stageData('current_strength', 'Float', controlStrengthSlider.value);
+            const stageStrength = debounce(() => stageData('current_strength', 'Float', controlStrengthSlider.value), 300);
             controlStrengthSlider.addEventListener('input', (e) => { controlStrengthValue.textContent = parseFloat(e.target.value).toFixed(2); stageStrength(); });
-            controlStrengthValue.textContent = parseFloat(controlStrengthSlider.value).toFixed(2);
-        }
+            controlStrengthValue.textContent = parseFloat(controlStrengthSlider.value).toFixed(2); // Set initial display
+        } else { console.error("Init Error: Strength slider or value span not found."); }
+
         if(cardCountSlider && cardCountValue) {
-             const stageCount = debounce(() => stageData('current_count', 'Int', countSlider.value), 300);
+             // Stage initial value
+             stageData('current_count', 'Int', cardCountSlider.value);
+             const stageCount = debounce(() => stageData('current_count', 'Int', cardCountSlider.value), 300);
             cardCountSlider.addEventListener('input', (e) => { cardCountValue.textContent = e.target.value; stageCount(); });
-            cardCountValue.textContent = cardCountSlider.value;
-        }
+            cardCountValue.textContent = cardCountSlider.value; // Set initial display
+        } else { console.error("Init Error: Count slider or value span not found."); }
+
         // --- Text Input Staging ---
          if(textPromptInput) {
-             const stagePrompt = debounce(() => stageData('current_prompt', 'Text', textPromptInput.value), 500); // Longer debounce for text
+             // Stage initial value (if any)
+             if (textPromptInput.value) {
+                 stageData('current_prompt', 'Text', textPromptInput.value);
+             }
+             const stagePrompt = debounce(() => stageData('current_prompt', 'Text', textPromptInput.value), 500); // Longer debounce for text / 文本使用更长的 debounce
              textPromptInput.addEventListener('input', stagePrompt);
-         }
+         } else { console.error("Init Error: Text prompt input not found."); }
 
 
         // --- Image Upload Logic (using new staging setup) ---
         setupInputStaging('line-draft-input', 'line-draft-preview', 'current_line_draft', 'Image');
-        setupInputStaging('reference-input', 'reference-preview', 'current_reference', 'Image'); // Stage reference too
+        setupInputStaging('reference-input', 'reference-preview', 'current_reference', 'Image'); // Stage reference too / 同时暂存参考
 
         // --- Render Button Click Listener ---
-        if (renderBtn && outputPlaceholder && workflowSelect && lineDraftInput && referenceInput && textPromptInput && strengthSlider && countSlider && resultLayerImg) {
+        // Check all required elements exist before adding listener
+        if (renderBtn && outputPlaceholder && workflowSelect && resultWrapper && resultLayerImg) { // Removed input checks as staging handles them
             renderBtn.addEventListener('click', async () => {
                 if (renderBtn.disabled) return;
                 console.log("Render button clicked!");
                 const selectedWorkflowKey = workflowSelect.value;
-                if (!selectedWorkflowKey) { alert("请先选择工作流。"); return; }
+                if (!selectedWorkflowKey) { alert("请先选择工作流。 / Please select a workflow first."); return; }
 
                 // --- UI Reset ---
-                renderBtn.disabled = true; renderBtn.textContent = '请求中...'; // Changed text
+                renderBtn.disabled = true; renderBtn.textContent = '请求中... / Requesting...';
                 hideStatusIndicator();
-                outputPlaceholder.style.display = 'flex'; outputPlaceholder.textContent = '正在触发执行...';
-                if(resultWrapper) resultWrapper.style.display = 'none';
-                if(resultLayerImg) resultLayerImg.src = '';
-                currentPromptId = null; currentOutputNodeId = null;
+                outputPlaceholder.style.display = 'flex'; outputPlaceholder.textContent = '正在触发执行... / Triggering execution...';
+                resultWrapper.style.display = 'none'; // Hide previous result / 隐藏先前结果
+                resultLayerImg.src = ''; // Clear previous image src / 清除先前图像 src
+                currentPromptId = null; currentOutputNodeId = null; // Reset tracking IDs / 重置跟踪 ID
                 // --- End UI Reset ---
 
                 // --- Trigger prompt via Flask backend ---
                 // The backend will load the workflow, inject staged data based on fixed keys, and queue it
-                const payload = { workflow_key: selectedWorkflowKey }; // Only need workflow key now
+                // 后端将加载工作流，根据固定键注入暂存数据，并将其排队
+                const payload = { workflow_key: selectedWorkflowKey }; // Only need workflow key now / 现在只需要工作流键
                 console.log('Sending trigger request to backend:', payload);
+                updateFooter('正在触发工作流...', 'progress'); // Update footer during trigger / 在触发期间更新页脚
 
                 try {
                     const response = await fetch(`${APP_API_BASE}/api/trigger_prompt`, { method: 'POST', headers: { 'Content-Type': 'application/json', }, body: JSON.stringify(payload) });
@@ -448,24 +493,25 @@
                         throw new Error(errorMsg);
                     }
                     console.log('Backend Trigger Request Success:', result);
-                    outputPlaceholder.textContent = '任务已提交，等待 ComfyUI 处理...';
+                    outputPlaceholder.textContent = '任务已提交，等待 ComfyUI 处理... / Job submitted, waiting for ComfyUI...';
                     updateStatusIndicator('任务已提交', 'busy');
-                    currentOutputNodeId = result.output_node_id; // Store output node ID for result fetching
-                    // ComfyUI WebSocket listener will track progress based on execution_start msg
+                    currentOutputNodeId = result.output_node_id; // Store output node ID for result fetching / 存储输出节点 ID 以便获取结果
+                    // ComfyUI WebSocket listener will track progress based on execution_start msg / ComfyUI WebSocket 监听器将根据 execution_start 消息跟踪进度
 
                 } catch (error) {
                     console.error('Error triggering prompt:', error);
-                    outputPlaceholder.textContent = `触发执行失败: ${error.message}`;
+                    outputPlaceholder.textContent = `触发执行失败 / Trigger failed: ${error.message}`;
                     updateStatusIndicator('触发失败', 'error');
-                    renderBtn.disabled = false; renderBtn.textContent = '渲染'; // Re-enable on error
+                    updateFooter('触发失败', 'disconnected'); // Update footer on trigger error / 触发错误时更新页脚
+                    renderBtn.disabled = false; renderBtn.textContent = '渲染'; // Re-enable on error / 出错时重新启用
                 }
             });
-        } else { console.error("Init Error: Cannot find required elements for render button listener."); }
+        } else { console.error("Init Error: Cannot find required elements for render button listener (renderBtn, outputPlaceholder, workflowSelect, resultWrapper, resultLayerImg)."); }
 
         // --- Other Button Listeners ---
-        if(saveBtn) saveBtn.addEventListener('click', () => { console.log('Save clicked'); alert("保存功能未实现"); });
-        if(saveLargeBtn) saveLargeBtn.addEventListener('click', () => { console.log('Save Large clicked'); alert("放大并保存功能未实现"); });
-        if (editToolbarElement) { editToolbarElement.querySelectorAll('.edit-icon').forEach((icon, index) => { icon.addEventListener('click', () => { console.log(`Edit Icon ${index + 1} clicked`); alert(`编辑工具 ${index+1} 未实现`); }); }); }
+        if(saveBtn) saveBtn.addEventListener('click', () => { console.log('Save clicked'); alert("保存功能未实现 / Save function not implemented"); });
+        if(saveLargeBtn) saveLargeBtn.addEventListener('click', () => { console.log('Save Large clicked'); alert("放大并保存功能未实现 / Upscale and save function not implemented"); });
+        if (editToolbarElement) { editToolbarElement.querySelectorAll('.edit-icon').forEach((icon, index) => { icon.addEventListener('click', () => { console.log(`Edit Icon ${index + 1} clicked`); alert(`编辑工具 ${index+1} 未实现 / Edit tool ${index+1} not implemented`); }); }); }
 
         // --- Initialize ComfyUI WebSocket Connection ---
         connectComfyUIWebSocket();

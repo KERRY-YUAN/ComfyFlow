@@ -1,3 +1,5 @@
+# V1.5.5，未成功，参考SDPPP逻辑调整，对接comfyui节点输入输出，修改详见内容
+
 20250416-1
 @@@@@修改：“NodeBridge_Input”调整：增加模式选择，选项为“Image，Reference，Text，CN，Count”，输出格式分别对应“image，iamge，string，float，int”；
 
@@ -37,5 +39,21 @@ https://github.com/zombieyang/sd-ppp
 
 
 
-20250416-4
-@@@@@修改：
+20250417-1
+以下分别为SDPPP网址内容、设计目标、我的github网址（未包含venv文件夹）
+@@@@@要求1：
+分析以下SDPPP网址内容，并从中归纳借鉴，以实现通过在HTML中读取comfyui中的自定义节点内容以实现html和comfyui的交互链接，
+@@@@@要求2：基本实现设计目标，在我的github仓库基础上提出修改意见
+
+@@@@@参考的SDPPP网址：
+https://github.com/zombieyang/sd-ppp
+@@@@@设计目标：
+html网页端设计工具界面，直接读取当前comfyui中打开的工作流，匹配其中的“NodeBridge_Input”、“NodeBridge_Output”节点（“上传线稿、上传参考、文字要求、控制强度、抽卡数量”接口将分别接入“NodeBridge_Input”节点的“Image，Reference，Text，CN，Count”；）;
+#当我在设计工具界面的上传线稿，上传图片后，在设计工具界面显示该图片，然后在“NodeBridge_Input”中以“Image“模式输出的节点中输出结果为该图片；
+#当我上传参考，上传图片后，在设计工具界面显示该图片，然后在“NodeBridge_Input”中以“Reference“模式输出的节点中输出结果为该图片；
+#当我在文字要求输入文字后，在设计工具界面显示文字，然后在“NodeBridge_Input”中以“Text“模式输出的节点中输出结果为文字；
+#其他接口逻辑参考以上功能。保证“上传线稿、上传参考、文字要求、控制强度、抽卡数量、成果输出”等项均可在”设计工具界面“和comfyui中建立联系。
+@@@@@我的github网址（未包含venv文件夹）：
+https://github.com/KERRY-YUAN/ComfyFlow
+
+20250417-1-反馈：在后台加载完成后，重开前台，可连接comfyui，但是无法加载工作流，无法互动
