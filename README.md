@@ -118,6 +118,7 @@ https://github.com/KERRY-YUAN/ComfyFlow/blob/main/static/css/style.css
 
 20250417-3-反馈：无法加载工作流，无法互动，节点bug
 
+20250417-4-反馈：无法加载工作流，无法互动，节点bug
 
 
 
