@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/icon.ico" type="image/x-icon">
+    <title>设计工具界面</title>
+    <style>
+        /* --- Base Styles / 基本样式 --- */
+        html { height: 100%; font-size: clamp(10px, 1.2vmin, 15px); box-sizing: border-box; }
+        *, *:before, *:after { box-sizing: inherit; }
+        body { font-family: system-ui, sans-serif; margin: 0; padding: 0; background-color: #1e1e1e; color: #d4d4d4; display: flex; min-height: 100vh; font-size: 0.9rem; line-height: 1.5; overflow: hidden; }
+        /* --- Main Layout / 主要布局 --- */
+        .container { display: flex; width: 100%; height: 100vh; padding: 1rem; gap: 1rem; }
+        /* --- Left Sidebar / 左侧边栏 --- */
+        .sidebar { width: 20rem; flex-shrink: 0; background-color: #2a2a2a; padding: 1rem; display: flex; flex-direction: column; border-radius: 0.3rem; height: 100%; gap: 1rem; }
+        .sidebar-content-area { flex-grow: 1; flex-shrink: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; min-height: 0; box-sizing: border-box; }
+        .flexible-content { flex-grow: 1; display: flex; flex-direction: column; gap: 1rem; min-height: 0; }
+        /* General Section Styling / 通用区域样式 */
+        .sidebar-section { background-color: #333; padding: 0.8rem 1rem; border-radius: 0.25rem; flex-grow: 0; flex-shrink: 1; display: flex; flex-direction: column; }
+        .sidebar-section.upload-section { flex-grow: 3; min-height: 7rem; }
+        .sidebar-section.text-prompt { flex-grow: 1; min-height: 4rem; }
+        /* Section Titles / 区域标题 */
+        .sidebar-section label, .sidebar-section h3 { display: block; font-size: 0.9rem; margin: 0 0 0.6rem 0; font-weight: 600; color: #cccccc; flex-shrink: 0; }
+        /* --- Specific Controls / 特定控件 --- */
+        .top-bar { display: flex; align-items: center; padding: 0.5rem 1rem; background-color: #333; border-radius: 0.25rem; flex-shrink: 0; }
+        .top-bar label, .top-bar select { font-size: 0.9rem; }
+        .top-bar label { margin-right: 0.6rem; font-weight: 600; color: #cccccc; white-space: nowrap; margin-bottom: 0; }
+        .top-bar select { flex-grow: 1; min-width: 3rem; padding: 0.4rem 0.6rem; background-color: #444; border: 1px solid #555; color: #d4d4d4; border-radius: 0.25rem; cursor: pointer; }
+        .upload-box { width: 100%; height: auto; flex-grow: 1; min-height: 5rem; background-color: #f0f0f0; border: 1px dashed #888; display: flex; justify-content: center; align-items: center; position: relative; cursor: pointer; border-radius: 0.25rem; overflow: hidden; transition: background-color 0.2s ease; }
+        .upload-box:hover { background-color: #e8e8e8; border-color: #666; }
+        .upload-box .plus-sign { font-size: 2.5rem; color: #999; position: absolute; z-index: 1; pointer-events: none; }
+        .upload-box img.preview-image { max-width: 100%; max-height: 100%; object-fit: contain; position: absolute; z-index: 0; display: none; }
+        .upload-box input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; }
+        .text-prompt textarea { width: 100%; height: auto; flex-grow: 1; min-height: 3rem; background-color: #444; border: 1px solid #555; color: #d4d4d4; padding: 0.6rem; border-radius: 0.25rem; resize: vertical; font-size: 0.9rem; line-height: 1.5; }
+        .text-prompt textarea::placeholder { color: #888; }
+        .slider-control { flex-shrink: 0; display: flex; flex-direction: column; gap: 0.4rem; background-color: #333; padding: 0.8rem 1rem; border-radius: 0.25rem; }
+        .slider-control > div { display: flex; align-items: center; gap: 0.8rem; }
+        .slider-control label { margin-bottom: 0; white-space: nowrap; }
+        .slider-control input[type="range"] { flex-grow: 1; cursor: pointer; accent-color: #007bff; min-width: 3rem; height: 0.5rem; }
+        .slider-control span { min-width: 3rem; text-align: right; font-weight: 600; }
+        /* --- Buttons / 按钮 --- */
+        .render-button, .output-actions button { padding: 0.7rem 1.2rem; font-size: 0.9rem; font-weight: 600; line-height: 1.4; height: auto; border-radius: 0.25rem; border: none; cursor: pointer; transition: background-color 0.2s ease, box-shadow 0.2s ease; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
+        .render-button:hover, .output-actions button:hover { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
+        .render-button { width: 100%; background-color: #007bff; color: white; margin-top: auto; }
+        .render-button:hover { background-color: #0056b3; }
+        /* --- Right Main Content / 右侧主内容区 --- */
+        .main-content { flex-grow: 1; min-width: 20rem; background-color: #2a2a2a; padding: 1rem; display: flex; flex-direction: column; border-radius: 0.3rem; position: relative; overflow: hidden; height: 100%; }
+        .title-toolbar-wrapper { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-shrink: 0; padding: 0.6rem 1rem; background-color: #333; border-radius: 0.25rem; }
+        .main-content h2 { margin: 0; padding: 0; background-color: transparent; border-radius: 0; font-size: 1.1rem; font-weight: 600; color: #cccccc; }
+        /* Output Area (Image Comparison) / 输出区域 (图片对比) */
+        .output-area { flex-grow: 1; background-color: #ffffff; border: 1px solid #444; border-radius: 0.25rem; position: relative; overflow: hidden; min-height: 10rem; cursor: default; }
+        .output-area.comparison-active { cursor: ew-resize; }
+        .output-placeholder { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; color: #aaa; font-size: 1.1rem; position: absolute; top: 0; left: 0; z-index: 0; }
+        /* Image Layers / 图片层 */
+        .output-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; }
+        .output-layer img { display: block; width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+        #output-line-draft-layer { z-index: 1; }
+        .output-result-wrapper { position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; z-index: 2; display: none; }
+        #output-result-layer { width: 100%; height: 100%; display: block; }
+        #output-result-layer img { width: 100%; height: 100%; }
+        .comparison-slider-indicator { position: absolute; top: 0; bottom: 0; width: 2px; background-color: rgba(0, 123, 255, 0.7); box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); cursor: ew-resize; pointer-events: none; z-index: 3; left: 50%; transform: translateX(-50%); display: none; }
+        .output-area.comparison-active .output-layer, .output-area.comparison-active .output-result-wrapper, .output-area.comparison-active .comparison-slider-indicator { display: block; }
+        .output-area.comparison-active .output-placeholder { display: none; }
+        /* Edit Toolbar / 编辑工具栏 */
+        .local-edit-toolbar { width: auto; height: auto; background-color: transparent; display: flex; flex-direction: row; align-items: center; gap: 0.7rem; flex-shrink: 0; }
+        .edit-icon { width: 2.2rem; height: 2.2rem; flex-shrink: 0; background-color: #5a5a5a; border: 1px solid #777; cursor: pointer; border-radius: 0.2rem; display: flex; justify-content: center; align-items: center; color: #ccc; font-size: 0.9rem; font-weight: 600; transition: background-color 0.2s ease, border-color 0.2s ease; }
+        .edit-icon:hover { background-color: #6a6a6a; border-color: #999; }
+        /* Output Action Buttons / 输出操作按钮 */
+        .output-actions { display: flex; align-items: center; justify-content: flex-end; gap: 0.8rem; flex-shrink: 0; padding-top: 1rem; }
+        .output-actions button { background-color: #007bff; color: white; }
+        .output-actions button:hover { background-color: #0056b3; }
+        .version-info-footer { font-size: 0.75rem; color: #5a5a5a; margin-right: auto; align-self: center; padding-left: 0.1rem; user-select: none; }
+
+        /* @@ ADDED: Status Indicator Styles @@ */
+        #comfyui-status-indicator {
+            position: absolute;
+            top: 1rem; /* Adjust as needed */
+            right: 1rem; /* Adjust as needed */
+            padding: 0.4rem 0.8rem;
+            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+            color: #b71c1c; /* Dark Red for default/busy */
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-radius: 0.2rem;
+            z-index: 10;
+            display: none; /* Hidden by default */
+            max-width: 250px; /* Prevent it from getting too wide */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            transition: color 0.3s ease, background-color 0.3s ease, opacity 0.5s ease; /* Smooth transitions */
+            opacity: 0; /* Start faded out */
+        }
+        #comfyui-status-indicator.visible {
+            display: block;
+            opacity: 1;
+        }
+        #comfyui-status-indicator.ready {
+            color: #2e7d32; /* Green for ready */
+            background-color: rgba(46, 125, 50, 0.7); /* Greenish background */
+        }
+        #comfyui-status-indicator.error {
+            color: #ff5252; /* Brighter Red for errors */
+            background-color: rgba(183, 28, 28, 0.7); /* Darker red background */
+        }
+
+    </style>
+</head>
+<body>
+    <!-- @@ ADDED: Status Indicator Div @@ -->
+    <div id="comfyui-status-indicator"></div>
+
+    <div class="container">
+        <!-- Left Sidebar / 左侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-content-area" id="sidebar-content">
+                <div class="top-bar">
+                    <label for="workflow-select">后台工作</label>
+                    <select id="workflow-select">
+                        <!-- Dynamically populated / 动态填充 -->
+                        {% if workflow_options %}
+                            {% for key, display_name in workflow_options.items() %}
+                                <!-- Value is the base filename (key) / 值是基本文件名 (键) -->
+                                <option value="{{ key }}">{{ display_name }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="" disabled>未找到工作流</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="flexible-content">
+                    <div class="sidebar-section upload-section"> <h3>上传线稿</h3> <div class="upload-box" id="line-draft-upload-area"> <span class="plus-sign">+</span> <img src="" alt="Line Draft Preview" class="preview-image" id="line-draft-preview"> <input type="file" id="line-draft-input" accept="image/*" title="Click to upload line draft"> </div> </div>
+                    <div class="sidebar-section upload-section"> <h3>上传参考</h3> <div class="upload-box" id="reference-upload-area"> <span class="plus-sign">+</span> <img src="" alt="Reference Preview" class="preview-image" id="reference-preview"> <input type="file" id="reference-input" accept="image/*" title="Click to upload reference image"> </div> </div>
+                    <div class="sidebar-section text-prompt"> <h3>文字要求</h3> <textarea id="text-prompt" placeholder="请输入文字要求"></textarea> </div>
+                </div>
+                <div class="sidebar-section slider-control"> <label for="control-strength">控制强度</label> <div> <input type="range" id="control-strength" min="0" max="1" step="0.01" value="0.50"> <span id="control-strength-value">0.50</span> </div> </div>
+                <div class="sidebar-section slider-control"> <label for="card-count">抽卡数量</label> <div> <input type="range" id="card-count" min="1" max="10" step="1" value="5"> <span id="card-count-value">5</span> </div> </div>
+            </div>
+            <button class="render-button" id="render-btn">渲染</button>
+        </div>
+
+        <!-- Right Main Content / 右侧主内容区 -->
+        <div class="main-content">
+            <div class="title-toolbar-wrapper"> <h2>成果输出</h2> <div class="local-edit-toolbar" id="edit-toolbar"> <div class="edit-icon" title="编辑工具1">1</div><div class="edit-icon" title="编辑工具2">2</div><div class="edit-icon" title="编辑工具3">3</div><div class="edit-icon" title="编辑工具4">4</div><div class="edit-icon" title="编辑工具5">5</div><div class="edit-icon" title="编辑工具6">6</div><div class="edit-icon" title="编辑工具7">7</div><div class="edit-icon" title="编辑工具8">8</div><div class="edit-icon" title="编辑工具9">9</div><div class="edit-icon" title="编辑工具10">10</div> </div> </div>
+            <div class="output-area" id="output-display">
+                 <span class="output-placeholder">等待生成结果...</span>
+                 <div class="output-layer" id="output-line-draft-layer"> <img src="" alt="Line Draft Output"> </div>
+                 <div class="output-result-wrapper"> <div class="output-layer" id="output-result-layer"> <img src="" alt="Result Output"> </div> </div>
+                 <div class="comparison-slider-indicator"></div>
+            </div>
+            <div class="output-actions">
+                <span class="version-info-footer">Kerry, Ver. 1.0.0</span>
+                <button id="save-btn">保存</button>
+                <button id="save-large-btn">放大并保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Debounce Function ---
+        function debounce(func, wait) { let timeout; return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); }; }
+
+        // --- Global variables ---
+        let uploadedLineDraftSrc = "";
+        let statusIndicatorTimeout = null; // Timer for hiding status / 用于隐藏状态的计时器
+
+        // --- Get Element References ---
+        const outputArea = document.getElementById('output-display');
+        const outputPlaceholder = outputArea.querySelector('.output-placeholder');
+        const lineDraftLayerImg = document.querySelector('#output-line-draft-layer img');
+        const resultWrapper = document.querySelector('.output-result-wrapper');
+        const resultLayerImg = document.querySelector('#output-result-layer img');
+        const sliderIndicator = document.querySelector('.comparison-slider-indicator');
+        const workflowSelect = document.getElementById('workflow-select');
+        const statusIndicator = document.getElementById('comfyui-status-indicator'); // Status indicator DIV
+
+        // --- Slider Value Display Update ---
+        const controlStrengthSlider = document.getElementById('control-strength');
+        const controlStrengthValue = document.getElementById('control-strength-value');
+        const cardCountSlider = document.getElementById('card-count');
+        const cardCountValue = document.getElementById('card-count-value');
+        if(controlStrengthSlider && controlStrengthValue) { controlStrengthSlider.addEventListener('input', (event) => { controlStrengthValue.textContent = parseFloat(event.target.value).toFixed(2); }); }
+        if(cardCountSlider && cardCountValue) { cardCountSlider.addEventListener('input', (event) => { cardCountValue.textContent = event.target.value; }); }
+
+        // --- Configuration ---
+        const COMFYUI_WS_URL = 'ws://127.0.0.1:8188/ws';
+        const COMFYUI_VIEW_URL_BASE = 'http://127.0.0.1:8188/view';
+        // NODE_ID_FOR_SAVE_IMAGE will be determined by the backend based on workflow,
+        // but we might need a way to know which node produced the final image if
+        // the WebSocket message itself doesn't identify it clearly.
+        // For now, we'll assume the 'executed' message for the correct node gives image data.
+        // NODE_ID_FOR_SAVE_IMAGE 将由后端根据工作流确定，
+        // 但如果 WebSocket 消息本身没有明确标识，我们可能需要一种方法来知道哪个节点生成了最终图像。
+        // 目前，我们假设正确节点的 'executed' 消息提供了图像数据。
+
+        // --- Image Upload Preview Logic (unchanged) ---
+        function setupImagePreview(inputId, previewId) { /* ... same as before ... */
+            const fileInput = document.getElementById(inputId); const imagePreview = document.getElementById(previewId); if (!fileInput || !imagePreview) return; let comfyuiFileInfo = null; fileInput.getComfyFileInfo = () => comfyuiFileInfo;
+            fileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0]; imagePreview.src = ''; imagePreview.style.display = 'none'; comfyuiFileInfo = null; if (inputId === 'line-draft-input') { uploadedLineDraftSrc = ""; window.uploadedLineDraftComfyFilename = null; window.uploadedLineDraftComfySubfolder = null; window.uploadedLineDraftComfyType = null; console.log("Stored line draft references cleared."); }
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader(); reader.onload = function(e) { const imageUrl = e.target.result; imagePreview.src = imageUrl; imagePreview.style.display = 'block'; if (inputId === 'line-draft-input') { uploadedLineDraftSrc = imageUrl; console.log("Line draft local preview src stored."); } }; reader.readAsDataURL(file);
+                    const formData = new FormData(); formData.append('image', file); console.log(`Uploading ${inputId} to backend...`);
+                    fetch('/api/upload', { method: 'POST', body: formData }).then(response => { if (!response.ok) { return response.json().then(err => { throw new Error(err.message || `HTTP error! status: ${response.status}`); }); } return response.json(); })
+                    .then(result => { if (result.success && result.data) { console.log(`Backend Upload Success for ${inputId}:`, result.data); comfyuiFileInfo = result.data; if (inputId === 'line-draft-input') { window.uploadedLineDraftComfyFilename = result.data.name; window.uploadedLineDraftComfySubfolder = result.data.subfolder; window.uploadedLineDraftComfyType = result.data.type; console.log("Line draft ComfyUI file info stored."); } fileInput.closest('.upload-box').style.borderColor = 'lightgreen'; } else { console.error(`Backend Upload Failed for ${inputId}:`, result.message); alert(`上传失败: ${result.message || '未知错误'}`); fileInput.closest('.upload-box').style.borderColor = 'red'; } })
+                    .catch(error => { console.error(`Error uploading ${inputId}:`, error); alert(`上传错误: ${error.message}`); fileInput.closest('.upload-box').style.borderColor = 'red'; comfyuiFileInfo = null; if (inputId === 'line-draft-input') { window.uploadedLineDraftComfyFilename = null; window.uploadedLineDraftComfySubfolder = null; window.uploadedLineDraftComfyType = null; } });
+                } else { fileInput.closest('.upload-box').style.borderColor = '#888'; }
+            });
+        }
+        setupImagePreview('line-draft-input', 'line-draft-preview');
+        setupImagePreview('reference-input', 'reference-preview');
+
+        // --- Image Comparison Logic (unchanged) ---
+        let isComparisonActive = false;
+        function handleMouseMove(event) { if (!isComparisonActive || !outputArea || !resultWrapper || !sliderIndicator) return; const rect = outputArea.getBoundingClientRect(); const x = event.clientX - rect.left; const width = outputArea.offsetWidth; let percentage = Math.max(0, Math.min(100, (x / width) * 100)); resultWrapper.style.width = percentage + '%'; sliderIndicator.style.left = percentage + '%'; }
+        function handleMouseLeave() { if (!isComparisonActive || !resultWrapper || !sliderIndicator) return; resultWrapper.style.width = '100%'; sliderIndicator.style.display = 'none'; }
+        function handleMouseEnter() { if (!isComparisonActive || !sliderIndicator) return; sliderIndicator.style.display = 'block'; }
+        function checkComparisonActivation() { const hasLineDraft = lineDraftLayerImg && lineDraftLayerImg.src && !lineDraftLayerImg.src.endsWith('/'); const hasResult = resultLayerImg && resultLayerImg.src && !resultLayerImg.src.endsWith('/'); if (hasLineDraft && hasResult) { if (!isComparisonActive) { outputArea.classList.add('comparison-active'); outputArea.addEventListener('mousemove', handleMouseMove); outputArea.addEventListener('mouseleave', handleMouseLeave); outputArea.addEventListener('mouseenter', handleMouseEnter); isComparisonActive = true; sliderIndicator.style.left = '50%'; sliderIndicator.style.display = 'block'; console.log("Image comparison activated."); } } else { if (isComparisonActive) { outputArea.classList.remove('comparison-active'); outputArea.removeEventListener('mousemove', handleMouseMove); outputArea.removeEventListener('mouseleave', handleMouseLeave); outputArea.removeEventListener('mouseenter', handleMouseEnter); isComparisonActive = false; sliderIndicator.style.display = 'none'; if(resultWrapper) resultWrapper.style.width = '100%'; console.log("Image comparison deactivated."); if (!hasResult && outputPlaceholder) { outputPlaceholder.style.display = 'flex'; outputPlaceholder.textContent = '等待生成结果...'; if (lineDraftLayerImg) lineDraftLayerImg.parentElement.style.display = 'none'; if (resultWrapper) resultWrapper.style.display = 'none'; } } } }
+
+        // --- Status Indicator Update Function ---
+        function updateStatusIndicator(message, type = 'busy') {
+            if (!statusIndicator) return;
+            clearTimeout(statusIndicatorTimeout); // Clear any pending hide timer
+
+            statusIndicator.textContent = message;
+            statusIndicator.classList.remove('ready', 'error', 'visible'); // Remove previous states
+
+            if (type === 'ready') {
+                statusIndicator.classList.add('ready');
+                 // Set timeout to hide after 10 seconds
+                 statusIndicatorTimeout = setTimeout(() => {
+                     statusIndicator.classList.remove('visible');
+                     statusIndicator.classList.remove('ready'); // Also remove ready class
+                 }, 10000); // 10000 milliseconds = 10 seconds
+            } else if (type === 'error') {
+                statusIndicator.classList.add('error');
+                // Errors stay visible until the next update or WS close
+            } else {
+                 // 'busy' state - dark red, no specific class needed beyond default
+            }
+
+            statusIndicator.classList.add('visible'); // Make it visible
+        }
+
+        function hideStatusIndicator() {
+             if (!statusIndicator) return;
+             clearTimeout(statusIndicatorTimeout);
+             statusIndicator.classList.remove('visible', 'ready', 'error');
+        }
+
+
+        // --- WebSocket Handling / WebSocket 监听逻辑 (listenForComfyUIResults) ---
+        function listenForComfyUIResults(clientId) {
+            if (window.comfyWs && window.comfyWs.readyState === WebSocket.OPEN) { console.log("Closing existing WebSocket connection."); window.comfyWs.close(); }
+
+            const wsUrl = `${COMFYUI_WS_URL}?clientId=${clientId}`; console.log("Connecting to ComfyUI WebSocket:", wsUrl); const ws = new WebSocket(wsUrl); window.comfyWs = ws;
+            hideStatusIndicator(); // Hide initially
+
+            ws.onopen = () => {
+                console.log('ComfyUI WebSocket connection established.');
+                // Don't show status indicator just for connection, wait for task updates
+                // updateStatusIndicator('已连接 ComfyUI');
+                outputPlaceholder.textContent = '已连接 ComfyUI，等待执行...';
+                outputPlaceholder.style.display = 'flex';
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data); console.debug("WS Message:", msg);
+                    const currentPlaceholder = document.querySelector('#output-display .output-placeholder'); // Find placeholder dynamically
+                    if (!currentPlaceholder) { console.error("Output placeholder not found inside ws.onmessage"); return; }
+
+                    // @@ MODIFIED: Update status indicator based on WS messages @@
+                    if (msg.type === 'status') {
+                        const status = msg.data.status; const queueRemaining = status.exec_info.queue_remaining;
+                        updateStatusIndicator(queueRemaining > 0 ? `队列: ${queueRemaining}` : '状态更新', 'busy'); // Show queue or generic status
+                        if (queueRemaining > 0) { currentPlaceholder.textContent = `队列剩余: ${queueRemaining}`; }
+                        else { currentPlaceholder.textContent = '准备执行...'; }
+                        currentPlaceholder.style.display = 'flex';
+                    } else if (msg.type === 'progress') {
+                        const progress = msg.data; const percent = progress.max > 0 ? (progress.value / progress.max * 100).toFixed(0) : 0;
+                        updateStatusIndicator(`渲染中: ${percent}%`, 'busy');
+                        currentPlaceholder.textContent = `渲染中... ${percent}%`; currentPlaceholder.style.display = 'flex';
+                    } else if (msg.type === 'executing') {
+                        const nodeTitle = msg.data.node ? `节点 ${msg.data.node}` : ''; // Get node ID if available
+                        updateStatusIndicator(`执行中 ${nodeTitle}`, 'busy');
+                        currentPlaceholder.textContent = '执行中...'; currentPlaceholder.style.display = 'flex';
+                    } else if (msg.type === 'executed') {
+                        // Check if this is the final image node or just an intermediate step
+                         // We rely on the output structure to know if it's the final image
+                         // This part remains largely the same, handling image display
+                        const data = msg.data;
+                        // Backend should tell us which node ID to look for based on workflow config
+                        // For now, assume any 'executed' with image output is the one we want
+                        // It's better if backend sends the specific NODE_ID_FOR_SAVE_IMAGE with the result
+                        let finalImageFound = false;
+                        if (data.output && data.output.images) { // Simpler check for any image output
+                           const imageInfo = data.output.images[0]; // Take the first image
+                           if (imageInfo) {
+                               const filename = encodeURIComponent(imageInfo.filename);
+                               const subfolder = encodeURIComponent(imageInfo.subfolder || '');
+                               const type = imageInfo.type || 'output';
+                               const resultImageUrl = `${COMFYUI_VIEW_URL_BASE}?filename=${filename}&subfolder=${subfolder}&type=${type}&rand=${Math.random()}`;
+                               console.log("Result Image URL:", resultImageUrl);
+                               resultLayerImg.src = resultImageUrl;
+
+                               // Set line draft... (same as before)
+                                if (uploadedLineDraftSrc) { lineDraftLayerImg.src = uploadedLineDraftSrc; console.log("Using local preview for line draft comparison."); }
+                                else if (window.uploadedLineDraftComfyFilename) { const ldFilename = encodeURIComponent(window.uploadedLineDraftComfyFilename); const ldSubfolder = encodeURIComponent(window.uploadedLineDraftComfySubfolder || ''); const ldType = window.uploadedLineDraftComfyType || 'input'; const lineDraftUrl = `${COMFYUI_VIEW_URL_BASE}?filename=${ldFilename}&subfolder=${ldSubfolder}&type=${ldType}&rand=${Math.random()}`; lineDraftLayerImg.src = lineDraftUrl; console.log("Using ComfyUI input URL for line draft comparison."); }
+                                else { lineDraftLayerImg.src = ""; console.log("No line draft provided for comparison."); }
+
+                               // Update UI... (same as before)
+                                if(currentPlaceholder) { currentPlaceholder.textContent = ''; currentPlaceholder.style.display = 'none'; }
+                                if (resultLayerImg && lineDraftLayerImg) { resultWrapper.style.display = 'block'; resultLayerImg.parentElement.style.display = 'block'; lineDraftLayerImg.parentElement.style.display = uploadedLineDraftSrc || window.uploadedLineDraftComfyFilename ? 'block' : 'none'; checkComparisonActivation(); }
+                                else { console.error("Result or Line Draft image element not found."); }
+                                finalImageFound = true;
+                           }
+                        }
+
+                         // If execution finished but no specific image found for this node
+                        if (msg.data.node === null && msg.data.prompt_id && !finalImageFound) {
+                             console.log("Execution finished (no image found in this 'executed' message):", msg.data.prompt_id);
+                             // Don't assume finished yet, wait for the node that *does* output the image
+                             // Or, if we *know* this is the end, update status. For now, let's wait.
+                             // updateStatusIndicator('处理完成', 'busy');
+                        }
+                        // Update status only if no image found here and it seems like the end? Risky.
+                        // Best practice: Rely on the "Starting server" signal for 'Ready'.
+
+                    } else if (msg.type === 'execution_error') {
+                        console.error("ComfyUI Execution Error:", msg.data);
+                        updateStatusIndicator(`错误: ${msg.data.exception_type || '执行错误'}`, 'error'); // Show error type
+                        currentPlaceholder.textContent = `渲染错误: ${msg.data.exception_message || '未知执行错误'}`;
+                        currentPlaceholder.style.display = 'flex';
+                        ws.close();
+                    } else if (msg.type === 'execution_cached') {
+                        console.log("Execution Cached:", msg.data);
+                         // Handle cached results similar to 'executed'
+                         updateStatusIndicator('使用缓存', 'busy');
+                         let finalImageFound = false;
+                         if (msg.data.nodes_output) {
+                             // Try to find image output in any node (less reliable)
+                             for (const nodeId in msg.data.nodes_output) {
+                                 const nodeOutput = msg.data.nodes_output[nodeId];
+                                 if (nodeOutput.images && nodeOutput.images.length > 0) {
+                                     const imageInfo = nodeOutput.images[0];
+                                     const filename = encodeURIComponent(imageInfo.filename); const subfolder = encodeURIComponent(imageInfo.subfolder || ''); const type = imageInfo.type || 'output'; const resultImageUrl = `${COMFYUI_VIEW_URL_BASE}?filename=${filename}&subfolder=${subfolder}&type=${type}&rand=${Math.random()}`; console.log("Cached Result Image URL:", resultImageUrl); resultLayerImg.src = resultImageUrl;
+                                     // ... (set line draft, hide placeholder, activate comparison) ...
+                                     if(currentPlaceholder) { currentPlaceholder.textContent = ''; currentPlaceholder.style.display = 'none'; }
+                                     if (resultLayerImg && lineDraftLayerImg) { resultWrapper.style.display = 'block'; resultLayerImg.parentElement.style.display = 'block'; lineDraftLayerImg.parentElement.style.display = uploadedLineDraftSrc || window.uploadedLineDraftComfyFilename ? 'block' : 'none'; checkComparisonActivation(); }
+                                     console.log("Displayed cached result.");
+                                     finalImageFound = true;
+                                     break; // Found an image, stop looking
+                                 }
+                             }
+                         }
+                          if (!finalImageFound) {
+                             console.log("Cached execution finished, but no image data found in output.");
+                             if(currentPlaceholder) { currentPlaceholder.textContent = '处理完成 (来自缓存)'; currentPlaceholder.style.display = 'flex'; }
+                          }
+                    }
+                    // @@ Detect the 'Ready' signal based on our marker logic @@
+                    // This signal comes from launcher.py *after* it sees "Starting server"
+                    // We might receive this *before* the first 'status' message if things start fast
+                    // Update: Let's handle the 'Ready' state logic within the marker processing section
+                    // of the main script logic triggered by the marker.
+
+                } catch (error) { console.error("Error processing WebSocket message:", error, "Raw data:", event.data); updateStatusIndicator('WS 处理错误', 'error');}
+            };
+
+            ws.onerror = (error) => { console.error('ComfyUI WebSocket error:', error); updateStatusIndicator('错误: WS 连接失败', 'error'); const currentPlaceholder = document.querySelector('#output-display .output-placeholder'); if(currentPlaceholder) { currentPlaceholder.textContent = '错误: WebSocket 连接失败'; currentPlaceholder.style.display = 'flex'; } };
+            ws.onclose = (event) => { console.log('ComfyUI WebSocket connection closed.', event.reason, event.code); hideStatusIndicator(); window.comfyWs = null; };
+        }
+
+        // --- Event Listeners for API Calls ---
+        const renderBtn = document.getElementById('render-btn');
+        if (renderBtn && outputArea && resultLayerImg && lineDraftLayerImg && outputPlaceholder && workflowSelect) {
+            renderBtn.addEventListener('click', () => {
+                const lineDraftInput = document.getElementById('line-draft-input'); const referenceInput = document.getElementById('reference-input');
+                const lineDraftInfo = lineDraftInput.getComfyFileInfo ? lineDraftInput.getComfyFileInfo() : null; const referenceInfo = referenceInput.getComfyFileInfo ? referenceInput.getComfyFileInfo() : null;
+                const selectedWorkflowKey = workflowSelect.value; // Get selected key
+                if (!selectedWorkflowKey) { alert("请先选择一个后台工作流程。"); return; }
+
+                const payload = {
+                    workflow_key: selectedWorkflowKey, // <-- Send selected workflow key
+                    lineDraft: lineDraftInfo ? { filename: lineDraftInfo.name, subfolder: lineDraftInfo.subfolder, type: lineDraftInfo.type } : null,
+                    reference: referenceInfo ? { filename: referenceInfo.name, subfolder: referenceInfo.subfolder, type: referenceInfo.type } : null,
+                    textPrompt: document.getElementById('text-prompt').value,
+                    controlStrength: parseFloat(document.getElementById('control-strength').value),
+                    cardCount: parseInt(document.getElementById('card-count').value),
+                };
+                console.log('Sending render request to backend:', payload);
+
+                // Reset UI State
+                hideStatusIndicator(); // Hide status on new render
+                outputArea.classList.remove('comparison-active'); isComparisonActive = false; outputArea.removeEventListener('mousemove', handleMouseMove); outputArea.removeEventListener('mouseleave', handleMouseLeave); outputArea.removeEventListener('mouseenter', handleMouseEnter);
+                outputPlaceholder.style.display = 'flex'; outputPlaceholder.textContent = '正在提交任务...';
+                lineDraftLayerImg.parentElement.style.display = 'none'; resultWrapper.style.display = 'none'; sliderIndicator.style.display = 'none';
+                lineDraftLayerImg.src = ''; resultLayerImg.src = '';
+
+                // Call Backend API
+                fetch('/api/render', { method: 'POST', headers: { 'Content-Type': 'application/json', }, body: JSON.stringify(payload) })
+                .then(response => { if (!response.ok) { return response.json().then(err => { throw new Error(err.message || `HTTP error! status: ${response.status}`); }); } return response.json(); })
+                .then(result => {
+                    if (result.success && result.client_id) { console.log('Backend Render Request Success:', result); outputPlaceholder.textContent = '任务已提交，等待 ComfyUI 处理...'; updateStatusIndicator('任务已提交', 'busy'); listenForComfyUIResults(result.client_id); } // Start listening
+                    else { console.error('Backend Render Request Failed:', result.message, result.details); outputPlaceholder.textContent = `错误: ${result.message || '无法提交渲染任务'}`; updateStatusIndicator('提交失败', 'error'); if (result.node_errors && Object.keys(result.node_errors).length > 0) { console.error("Node Errors:", result.node_errors); } }
+                })
+                .catch(error => { console.error('Error sending render request:', error); outputPlaceholder.textContent = `错误: ${error.message || '无法连接到后端服务'}`; updateStatusIndicator('连接错误', 'error'); });
+            });
+        }
+
+        // --- Simulate Receiving the Ready Marker (for Status Indicator) ---
+        // This function will be called by the launcher's process_output_queues
+        // when the marker is received. We need to call it from JS now.
+        // Let's assume the `listenForComfyUIResults` handles the actual ComfyUI output,
+        // and we just need a separate trigger for the "Ready" status display.
+        // We can expose a function for this.
+        window.signalComfyUIReady = function() {
+             console.log("JS: Received signalComfyUIReady call.");
+             updateStatusIndicator('准备就绪 / Starting server', 'ready');
+        }
+
+        // Other button listeners (unchanged)
+        const saveBtn = document.getElementById('save-btn'); if(saveBtn) saveBtn.addEventListener('click', () => { /* # API Interface */ console.log('API Call: Save clicked'); });
+        const saveLargeBtn = document.getElementById('save-large-btn'); if(saveLargeBtn) saveLargeBtn.addEventListener('click', () => { /* # API Interface */ console.log('API Call: Save Large clicked'); });
+        const editToolbarElement = document.getElementById('edit-toolbar'); if (editToolbarElement) { editToolbarElement.querySelectorAll('.edit-icon').forEach((icon, index) => { icon.addEventListener('click', () => { /* # API Interface */ console.log(`API Call: Local Edit Icon ${index + 1} clicked`); }); }); }
+
+    </script>
+
+</body>
+</html>

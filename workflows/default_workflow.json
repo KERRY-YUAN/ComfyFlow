@@ -1,0 +1,152 @@
+{
+  "10": {
+    "inputs": {
+      "mode": "Image",
+      "value": "",
+      "trigger": 0,
+      "speak_and_recognation": {
+        "__value__": [
+          false,
+          true
+        ]
+      }
+    },
+    "class_type": "NodeBridge_Input",
+    "_meta": {
+      "title": "NodeBridge_Input"
+    }
+  },
+  "11": {
+    "inputs": {
+      "filename_prefix": "WebApp_Output",
+      "images": [
+        "13",
+        0
+      ]
+    },
+    "class_type": "NodeBridge_Output",
+    "_meta": {
+      "title": "NodeBridge_Output"
+    }
+  },
+  "12": {
+    "inputs": {
+      "mode": "Reference",
+      "value": "",
+      "trigger": 0,
+      "speak_and_recognation": {
+        "__value__": [
+          false,
+          true
+        ]
+      }
+    },
+    "class_type": "NodeBridge_Input",
+    "_meta": {
+      "title": "NodeBridge_Input"
+    }
+  },
+  "13": {
+    "inputs": {
+      "image1": [
+        "10",
+        0
+      ],
+      "image2": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "ImageBatch",
+    "_meta": {
+      "title": "组合图像批次"
+    }
+  },
+  "14": {
+    "inputs": {
+      "mode": "Text",
+      "value": "",
+      "trigger": 0,
+      "speak_and_recognation": {
+        "__value__": [
+          false,
+          true
+        ]
+      }
+    },
+    "class_type": "NodeBridge_Input",
+    "_meta": {
+      "title": "NodeBridge_Input"
+    }
+  },
+  "15": {
+    "inputs": {
+      "anything": [
+        "14",
+        1
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "展示任何"
+    }
+  },
+  "17": {
+    "inputs": {
+      "anything": [
+        "18",
+        2
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "展示任何"
+    }
+  },
+  "18": {
+    "inputs": {
+      "mode": "Float",
+      "value": "",
+      "trigger": 0,
+      "speak_and_recognation": {
+        "__value__": [
+          false,
+          true
+        ]
+      }
+    },
+    "class_type": "NodeBridge_Input",
+    "_meta": {
+      "title": "NodeBridge_Input"
+    }
+  },
+  "19": {
+    "inputs": {
+      "anything": [
+        "20",
+        3
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "展示任何"
+    }
+  },
+  "20": {
+    "inputs": {
+      "mode": "Int",
+      "value": "",
+      "trigger": 0,
+      "speak_and_recognation": {
+        "__value__": [
+          false,
+          true
+        ]
+      }
+    },
+    "class_type": "NodeBridge_Input",
+    "_meta": {
+      "title": "NodeBridge_Input"
+    }
+  }
+}
