@@ -1,5 +1,8 @@
 Flask>=2.0
 requests>=2.20
-flask-socketio
+Flask-SocketIO
+requests
+python-socketio[client]
+gevent-websocket
 Pillow
 eventlet # Or gevent, choose one async mode

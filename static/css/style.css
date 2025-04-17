@@ -1,0 +1,204 @@
+/* File: static/css/style.css (From KERRY-YUAN/ComfyFlow repo) */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align items to the start */
+    min-height: 100vh; /* Ensure body takes full height */
+    background-color: #f4f4f4; /* Light grey background */
+}
+
+.container {
+    display: flex;
+    justify-content: space-between; /* Space out the columns */
+    width: 90%; /* Container width */
+    max-width: 1400px; /* Maximum width */
+    margin-top: 20px; /* Top margin */
+    padding: 20px;
+    background-color: #ffffff; /* White background for the container */
+    box-shadow: 0 0 15px rgba(0,0,0,0.1); /* Soft shadow */
+    border-radius: 8px; /* Rounded corners */
+}
+
+.control-panel, .output-section {
+    width: 48%; /* Assign width to each section */
+    padding: 15px;
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.control-panel {
+    border-right: 1px solid #e0e0e0; /* Separator line */
+}
+
+h1, h2 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h2 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-top: 20px; /* Space between sections */
+}
+
+.input-section {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="file"],
+textarea,
+select,
+input[type="number"],
+input[type="range"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px; /* Minimum height for textarea */
+}
+
+input[type="range"] {
+    height: 8px; /* Make slider track thinner */
+    cursor: pointer;
+}
+
+/* Style for slider value display */
+#control-strength-value {
+    font-weight: bold;
+    color: #007bff; /* Blue color for the value */
+    margin-left: 5px;
+}
+
+button {
+    background-color: #28a745; /* Green color for button */
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    width: 100%; /* Make button full width */
+    margin-top: 10px; /* Space above the button */
+    transition: background-color 0.3s ease;
+}
+
+button:hover:not(:disabled) {
+    background-color: #218838; /* Darker green on hover */
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.image-preview {
+    display: block; /* Make image block level */
+    max-width: 100%; /* Max width is container width */
+    height: auto; /* Maintain aspect ratio */
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    padding: 5px;
+    border-radius: 4px;
+    background-color: #f9f9f9; /* Slight background for preview area */
+    max-height: 250px; /* Limit preview height */
+    object-fit: contain; /* Ensure image fits within bounds */
+}
+
+#output-area {
+    margin-top: 20px;
+    min-height: 200px; /* Minimum height */
+    border: 1px dashed #ccc; /* Dashed border */
+    padding: 10px;
+    background-color: #f9f9f9; /* Light background */
+    display: flex; /* Use flexbox for image layout */
+    flex-wrap: wrap; /* Allow images to wrap */
+    gap: 10px; /* Space between images */
+    justify-content: center; /* Center images */
+    align-items: center; /* Center images vertically */
+}
+
+#output-area img {
+    max-width: calc(50% - 10px); /* Max width for two images per row, considering gap */
+    max-height: 300px; /* Max height for output images */
+    height: auto;
+    border: 1px solid #ddd;
+    padding: 5px;
+    border-radius: 4px;
+    background-color: #fff; /* White background for images */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Styles for Status, Error, Progress */
+.status-feedback {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #e9ecef; /* Light grey background */
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+}
+
+.error-message {
+    color: #dc3545; /* Red for errors */
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+#status-message {
+    font-weight: bold;
+    color: #007bff; /* Blue for status */
+}
+
+#progress-bar-container {
+    margin-top: 10px;
+    display: none; /* Initially hidden */
+}
+
+#progress-bar {
+    width: 100%;
+    height: 20px;
+    appearance: none; /* Remove default appearance */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden; /* Ensure inner bar respects border-radius */
+}
+
+/* Style for the progress bar value */
+#progress-bar::-webkit-progress-value {
+    background-color: #28a745; /* Green progress */
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+#progress-bar::-moz-progress-bar {
+    background-color: #28a745; /* Green progress */
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+#progress-text {
+    margin-left: 10px;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+#progress-node {
+    font-size: 0.9em;
+    color: #6c757d; /* Grey color */
+    margin-bottom: 5px;
+    display: block; /* Make it block level */
+}
