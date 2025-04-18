@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="/icon.ico" type="image/x-icon">
-    <title>设计工具界面</title>
+    <!-- Make sure the path to icon.ico is correct relative to the static folder -->
+    <!-- 确保存储 icon.ico 相对于静态文件夹的路径正确 -->
+    <link rel="icon" href="/static/icon.ico" type="image/x-icon">
+    <title>ComfyFlow 设计工具</title>
     <style>
         /* --- Base Styles / 基本样式 --- */
         html { height: 100%; font-size: clamp(10px, 1.2vmin, 15px); box-sizing: border-box; }
         *, *:before, *:after { box-sizing: inherit; }
         body {
-            font-family: system-ui, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             margin: 0;
             padding: 0 0 2.5rem 0; /* Space for log footer / 为日志页脚留出空间 */
             background-color: #1e1e1e;
@@ -24,7 +26,7 @@
         /* --- Main Layout / 主要布局 --- */
         .container { display: flex; width: 100%; height: calc(100vh - 2.5rem); /* Adjusted for footer / 为页脚调整 */ padding: 1rem; gap: 1rem; }
         /* --- Left Sidebar / 左侧边栏 --- */
-        .sidebar { width: 20rem; flex-shrink: 0; background-color: #2a2a2a; padding: 1rem; display: flex; flex-direction: column; border-radius: 0.3rem; height: 100%; gap: 1rem; }
+        .sidebar { width: 22rem; /* Increased width slightly / 宽度略微增加 */ flex-shrink: 0; background-color: #2a2a2a; padding: 1rem; display: flex; flex-direction: column; border-radius: 0.3rem; height: 100%; gap: 1rem; }
         .sidebar-content-area { flex-grow: 1; flex-shrink: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; min-height: 0; box-sizing: border-box; scrollbar-width: thin; scrollbar-color: #555 #2a2a2a; }
         .sidebar-content-area::-webkit-scrollbar { width: 8px; }
         .sidebar-content-area::-webkit-scrollbar-track { background: #2a2a2a; }
@@ -42,72 +44,75 @@
         .top-bar select { flex-grow: 1; min-width: 3rem; padding: 0.4rem 0.6rem; background-color: #444; border: 1px solid #555; color: #d4d4d4; border-radius: 0.25rem; cursor: pointer; }
         .upload-box { width: 100%; height: auto; flex-grow: 1; min-height: 5rem; background-color: #444; border: 1px dashed #888; display: flex; justify-content: center; align-items: center; position: relative; cursor: pointer; border-radius: 0.25rem; overflow: hidden; transition: background-color 0.2s ease, border-color 0.2s ease; }
         .upload-box:hover { background-color: #505050; border-color: #aaa; }
-        .upload-box .plus-sign { font-size: 2.5rem; color: #888; position: absolute; z-index: 1; pointer-events: none; }
-        .upload-box img.preview-image { max-width: 100%; max-height: 100%; object-fit: contain; position: absolute; z-index: 0; display: none; }
+        .upload-box .plus-sign { font-size: 2.5rem; color: #888; position: absolute; z-index: 1; pointer-events: none; transition: opacity 0.2s ease; }
+        .upload-box img.preview-image { max-width: 100%; max-height: 100%; object-fit: contain; position: absolute; z-index: 0; display: none; background-color: #383838; /* Darker background for preview */ }
         .upload-box input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; }
-        /* Adding feedback styles directly here for simplicity */
-        /* 为简单起见，在此处直接添加反馈样式 */
-        .upload-box.success { border-color: lightgreen !important; background-color: #454; }
-        .upload-box.error { border-color: red !important; background-color: #544; }
+        /* Hide plus sign when preview is shown / 预览显示时隐藏加号 */
+        .upload-box.has-preview .plus-sign { opacity: 0; }
+        /* Visual feedback for upload state / 上传状态的可视化反馈 */
+        .upload-box.success { border-color: #2e7d32 !important; /* Green border / 绿色边框 */ }
+        .upload-box.error { border-color: #b71c1c !important; /* Red border / 红色边框 */ }
         .text-prompt textarea { width: 100%; height: auto; flex-grow: 1; min-height: 3rem; background-color: #444; border: 1px solid #555; color: #d4d4d4; padding: 0.6rem; border-radius: 0.25rem; resize: vertical; font-size: 0.9rem; line-height: 1.5; }
         .text-prompt textarea::placeholder { color: #888; }
         .slider-control { flex-shrink: 0; display: flex; flex-direction: column; gap: 0.4rem; background-color: #333; padding: 0.8rem 1rem; border-radius: 0.25rem; }
         .slider-control > div { display: flex; align-items: center; gap: 0.8rem; }
         .slider-control label { margin-bottom: 0; white-space: nowrap; }
         .slider-control input[type="range"] { flex-grow: 1; cursor: pointer; accent-color: #007bff; min-width: 3rem; height: 0.5rem; }
-        .slider-control span { min-width: 3rem; text-align: right; font-weight: 600; }
+        .slider-control span { min-width: 3rem; text-align: right; font-weight: 600; font-family: monospace; /* Use monospace for stable width / 使用等宽字体以保证宽度稳定 */ }
 
         /* --- Buttons / 按钮 --- */
-        .render-button, .output-actions button { padding: 0.7rem 1.2rem; font-size: 0.9rem; font-weight: 600; line-height: 1.4; height: auto; border-radius: 0.25rem; border: none; cursor: pointer; transition: background-color 0.2s ease, box-shadow 0.2s ease; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
-        .render-button:hover, .output-actions button:hover { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
-        .render-button { width: 100%; background-color: #007bff; color: white; margin-top: auto; }
-        .render-button:hover { background-color: #0056b3; }
-        .render-button:disabled { background-color: #5a5a5a; color: #aaa; cursor: not-allowed; box-shadow: none; }
+        .render-button, .output-actions button { padding: 0.7rem 1.2rem; font-size: 0.9rem; font-weight: 600; line-height: 1.4; height: auto; border-radius: 0.25rem; border: none; cursor: pointer; transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
+        .render-button:hover:not(:disabled), .output-actions button:hover { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
+        .render-button { width: 100%; background-color: #007bff; color: white; margin-top: auto; } /* Changed from #28a745 to #007bff / 从 #28a745 改为 #007bff */
+        .render-button:hover:not(:disabled) { background-color: #0056b3; }
+        .render-button:disabled { background-color: #5a5a5a !important; /* Use !important to override hover */ color: #aaa !important; cursor: not-allowed; box-shadow: none; }
 
         /* --- Right Main Content / 右侧主内容区 --- */
         .main-content { flex-grow: 1; min-width: 20rem; background-color: #2a2a2a; padding: 1rem; display: flex; flex-direction: column; border-radius: 0.3rem; position: relative; overflow: hidden; height: 100%; }
         .title-toolbar-wrapper { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-shrink: 0; padding: 0.6rem 1rem; background-color: #333; border-radius: 0.25rem; }
         .main-content h2 { margin: 0; padding: 0; background-color: transparent; border-radius: 0; font-size: 1.1rem; font-weight: 600; color: #cccccc; }
         /* Output Area Styles */
-        .output-area { flex-grow: 1; background-color: #383838; border: 1px solid #444; border-radius: 0.25rem; position: relative; overflow: hidden; min-height: 10rem; cursor: default; }
-        .output-placeholder { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; color: #aaa; font-size: 1.1rem; position: absolute; top: 0; left: 0; z-index: 0; text-align: center; padding: 1rem; user-select: none; }
-        /* Output Layer */
-        .output-result-wrapper { position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; z-index: 2; display: none; }
-        #output-result-layer { width: 100%; height: 100%; display: block; }
-        #output-result-layer img { display: block; width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+        .output-area { flex-grow: 1; background-color: #383838; border: 1px solid #444; border-radius: 0.25rem; position: relative; overflow-y: auto; /* Allow vertical scroll if content overflows / 如果内容溢出，允许垂直滚动 */ min-height: 10rem; cursor: default; display: flex; flex-wrap: wrap; /* Allow items to wrap / 允许项目换行 */ gap: 10px; /* Spacing between images / 图像之间的间距 */ padding: 10px; /* Padding inside the area / 区域内边距 */ align-content: flex-start; /* Align wrapped lines to the start / 将换行行对齐到顶部 */ }
+        .output-placeholder { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; color: #aaa; font-size: 1.1rem; position: absolute; top: 0; left: 0; z-index: 0; text-align: center; padding: 1rem; user-select: none; pointer-events: none; /* Ensure it doesn't block clicks / 确保它不阻止点击 */ }
+        /* Output Image Styles (Individual Images) */
+        .output-area img { display: block; /* Each image on its own block */ max-width: 100%; /* Max width is container width */ height: auto; /* Maintain aspect ratio */ object-fit: contain; border: 1px solid #555; border-radius: 0.25rem; background-color: #2a2a2a; flex-grow: 1; /* Allow images to grow if space available */ min-width: 150px; /* Minimum width for smaller images / 较小图像的最小宽度 */ }
 
-        /* Edit Toolbar */
+        /* Remove the separate result wrapper/layer as images are directly in output-area / 移除单独的结果包装器/层，因为图像直接在 output-area 中 */
+        /* .output-result-wrapper { display: none; } */
+
+        /* Edit Toolbar (Placeholder) */
         .local-edit-toolbar { width: auto; height: auto; background-color: transparent; display: flex; flex-direction: row; align-items: center; gap: 0.7rem; flex-shrink: 0; }
-        .edit-icon { width: 2.2rem; height: 2.2rem; flex-shrink: 0; background-color: #5a5a5a; border: 1px solid #777; cursor: pointer; border-radius: 0.2rem; display: flex; justify-content: center; align-items: center; color: #ccc; font-size: 0.9rem; font-weight: 600; transition: background-color 0.2s ease, border-color 0.2s ease; }
+        .edit-icon { width: 2.2rem; height: 2.2rem; flex-shrink: 0; background-color: #5a5a5a; border: 1px solid #777; cursor: pointer; border-radius: 0.2rem; display: flex; justify-content: center; align-items: center; color: #ccc; font-size: 0.9rem; font-weight: 600; transition: background-color 0.2s ease, border-color 0.2s ease; user-select: none; /* Prevent text selection / 阻止文本选择 */ }
         .edit-icon:hover { background-color: #6a6a6a; border-color: #999; }
         /* Output Action Buttons */
         .output-actions { display: flex; align-items: center; justify-content: flex-end; gap: 0.8rem; flex-shrink: 0; padding-top: 1rem; }
-        .output-actions button { background-color: #007bff; color: white; }
-        .output-actions button:hover { background-color: #0056b3; }
+        .output-actions button { background-color: #4a4a4a; color: #ccc; } /* Muted color / 柔和的颜色 */
+        .output-actions button:hover:not(:disabled) { background-color: #5a5a5a; }
         .version-info-footer { font-size: 0.75rem; color: #5a5a5a; margin-right: auto; align-self: center; padding-left: 0.1rem; user-select: none; }
 
         /* Status Indicator Styles */
-        #comfyui-status-indicator { position: absolute; top: 1rem; right: 1rem; padding: 0.4rem 0.8rem; background-color: rgba(0, 0, 0, 0.6); color: #b71c1c; font-size: 0.8rem; font-weight: 500; border-radius: 0.2rem; z-index: 10; display: none; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.3s ease, background-color 0.3s ease, opacity 0.5s ease; opacity: 0; }
+        #comfyui-status-indicator { position: fixed; /* Changed to fixed */ top: 1rem; right: 1rem; padding: 0.4rem 0.8rem; background-color: rgba(0, 0, 0, 0.7); color: #ffab00; /* Default to busy */ font-size: 0.8rem; font-weight: 500; border-radius: 0.2rem; z-index: 1000; /* High z-index */ display: none; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.3s ease, background-color 0.3s ease, opacity 0.5s ease; opacity: 0; }
         #comfyui-status-indicator.visible { display: block; opacity: 1; }
-        #comfyui-status-indicator.busy { color: #ffab00; background-color: rgba(80, 60, 0, 0.7); }
-        #comfyui-status-indicator.ready { color: #2e7d32; background-color: rgba(46, 125, 50, 0.7); }
-        #comfyui-status-indicator.error { color: #ff5252; background-color: rgba(183, 28, 28, 0.7); }
+        #comfyui-status-indicator.busy { color: #ffab00; background-color: rgba(80, 60, 0, 0.8); }
+        #comfyui-status-indicator.ready { color: #90ee90; /* Lighter green */ background-color: rgba(46, 125, 50, 0.8); }
+        #comfyui-status-indicator.error { color: #ff5252; background-color: rgba(183, 28, 28, 0.8); }
 
         /* --- Log Footer Styles --- */
         .log-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #1a1a1a; color: #9a9a9a; padding: 0.4rem 1rem; font-size: 0.8rem; line-height: 1.3; z-index: 100; box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.3); box-sizing: border-box; height: 2.5rem; display: flex; align-items: center; }
-        #backend-log-display { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace; width: 100%; }
+        #backend-log-display { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace; width: 100%; transition: color 0.3s ease; }
         #backend-log-display.disconnected { color: #ff6b6b; font-style: italic; }
         #backend-log-display.connecting { color: #f0e68c; font-style: italic; }
         #backend-log-display.connected { color: #90ee90; }
-        #backend-log-display.progress { color: #87ceeb; }
+        #backend-log-display.progress, #backend-log-display.busy { color: #87ceeb; } /* Use same color for progress/busy */
         #backend-log-display.idle { color: #9a9a9a; }
-        #backend-log-display.error { color: #ff5252; } /* Added error style */
+        #backend-log-display.error { color: #ff5252; }
 
-        /* Error message specific div (can be used for input validation errors) */
-        /* 错误消息特定 div（可用于输入验证错误） */
-        .error-message { color: #ff5252; font-size: 0.8rem; margin-top: 0.3rem; min-height: 1em; /* Reserve space */ }
-        /* Progress bar container (hidden, as footer provides progress text) */
-        /* 进度条容器（隐藏，因为页脚提供进度文本） */
+        /* Error message specific div (used for workflow loading errors) */
+        /* 错误消息特定 div（用于工作流加载错误） */
+        .error-message { color: #ff5252; font-size: 0.8rem; margin-top: 0.3rem; min-height: 1em; /* Reserve space / 保留空间 */ }
+
+        /* Hide progress bar (status shown in footer/indicator) */
+        /* 隐藏进度条（状态显示在页脚/指示器中） */
         #progress-bar-container { display: none !important; }
 
     </style>
@@ -117,60 +122,78 @@
 
 </head>
 <body>
-    <!-- ComfyUI Status Indicator -->
-    <div id="comfyui-status-indicator"></div>
+    <!-- ComfyUI Status Indicator (Fixed Position) -->
+    <!-- ComfyUI 状态指示器（固定位置） -->
+    <div id="comfyui-status-indicator">连接中...</div>
 
     <div class="container">
         <!-- Left Sidebar -->
+        <!-- 左侧边栏 -->
         <div class="sidebar">
              <div class="sidebar-content-area" id="sidebar-content">
                 <!-- Workflow Selection -->
+                <!-- 工作流选择 -->
                 <div class="top-bar">
                     <label for="workflow-select">后台工作:</label>
                     <select id="workflow-select">
-                        <option value="">--请选择--</option>
+                        <option value="">--加载中--</option>
                     </select>
                 </div>
                 <!-- Workflow Error Display -->
+                <!-- 工作流错误显示 -->
                 <div id="workflow-error" class="error-message" style="padding: 0 1rem;"></div>
 
                 <!-- Flexible Content Area -->
+                <!-- 灵活内容区域 -->
                 <div class="flexible-content">
                     <!-- Line Art Upload -->
+                    <!-- 上传线稿 -->
                     <div class="sidebar-section upload-section">
                         <h3>上传线稿</h3>
-                        <div class="upload-box" id="line-draft-upload-area">
+                        <!-- Added ID to upload box for easier selection -->
+                        <!-- 为上传框添加了 ID 以方便选择 -->
+                        <div class="upload-box" id="lineart-upload-box">
                             <span class="plus-sign">+</span>
-                            <img src="#" alt="Line Art Preview" class="preview-image" id="lineart-preview" style="display: none;">
+                            <img src="#" alt="线稿预览" class="preview-image" id="lineart-preview">
                             <input type="file" id="lineart-upload" accept="image/*" title="点击上传线稿">
                         </div>
                     </div>
                     <!-- Reference Upload -->
+                    <!-- 上传参考 -->
                     <div class="sidebar-section upload-section">
                         <h3>上传参考</h3>
-                        <div class="upload-box" id="reference-upload-area">
+                        <!-- Added ID to upload box -->
+                        <!-- 为上传框添加了 ID -->
+                        <div class="upload-box" id="reference-upload-box">
                             <span class="plus-sign">+</span>
-                            <img src="#" alt="Reference Preview" class="preview-image" id="reference-preview" style="display: none;">
+                            <img src="#" alt="参考图预览" class="preview-image" id="reference-preview">
                             <input type="file" id="reference-upload" accept="image/*" title="点击上传参考图">
                         </div>
                     </div>
                     <!-- Text Prompt -->
+                    <!-- 文字要求 -->
                     <div class="sidebar-section text-prompt">
                         <h3>文字要求</h3>
-                        <textarea id="text-prompt" rows="3" placeholder="请输入文字要求"></textarea>
+                        <textarea id="text-prompt" rows="3" placeholder="请输入文字要求 (Enter text prompt)"></textarea>
                     </div>
-                </div>
+                </div> <!-- End flexible-content -->
+
                 <!-- Sliders -->
+                <!-- 滑块 -->
                 <div class="sidebar-section slider-control">
-                    <label for="control-strength">控制强度</label>
+                    <label for="control-strength">控制强度 (CN Strength)</label>
                     <div>
                         <input type="range" id="control-strength" min="0.0" max="2.0" step="0.01" value="1.0">
                         <span id="control-strength-value">1.00</span>
                     </div>
                 </div>
                 <div class="sidebar-section slider-control">
-                    <label for="card-count">抽卡数量</label>
+                    <!-- Corrected label 'for' attribute -->
+                    <!-- 修正了标签的 'for' 属性 -->
+                    <label for="card-count">抽卡数量 (Count)</label>
                     <div>
+                        <!-- Corrected input ID to match label -->
+                        <!-- 修正了输入 ID 以匹配标签 -->
                         <input type="range" id="card-count" min="1" max="100" step="1" value="1">
                         <span id="card-count-value">1</span>
                     </div>
@@ -178,67 +201,115 @@
             </div> <!-- End sidebar-content-area -->
 
             <!-- Render Button -->
-            <button class="render-button" id="render-button" disabled>渲染 (Render)</button>
+            <!-- 渲染按钮 -->
+            <button class="render-button" id="render-button" disabled>选择工作流 (Select Workflow)</button>
         </div> <!-- End sidebar -->
 
         <!-- Right Main Content -->
+        <!-- 右侧主内容区 -->
         <div class="main-content">
             <!-- Title and Toolbar wrapper -->
+            <!-- 标题和工具栏包装器 -->
             <div class="title-toolbar-wrapper">
-                <h2>成果输出</h2>
+                <h2>成果输出 (Output)</h2>
                 <!-- Edit Toolbar (Placeholder) -->
+                <!-- 编辑工具栏（占位符） -->
                 <div class="local-edit-toolbar" id="edit-toolbar">
                     <div class="edit-icon" title="编辑工具1">1</div><div class="edit-icon" title="编辑工具2">2</div><div class="edit-icon" title="编辑工具3">3</div><div class="edit-icon" title="编辑工具4">4</div><div class="edit-icon" title="编辑工具5">5</div><div class="edit-icon" title="编辑工具6">6</div><div class="edit-icon" title="编辑工具7">7</div><div class="edit-icon" title="编辑工具8">8</div><div class="edit-icon" title="编辑工具9">9</div><div class="edit-icon" title="编辑工具10">10</div>
                 </div>
             </div>
             <!-- Output Area -->
+            <!-- 输出区域 -->
+            <!-- Changed structure: Placeholder inside, images added directly -->
+            <!-- 更改了结构：占位符在内，图像直接添加 -->
             <div class="output-area" id="output-area">
-                 <span class="output-placeholder">等待生成结果...</span>
-                 <div class="output-result-wrapper">
-                     <div class="output-layer" id="output-result-layer">
-                         <img src="" alt="Result Output">
-                     </div>
-                 </div>
+                 <span class="output-placeholder">等待生成结果 (Waiting for results...)</span>
+                 <!-- Images will be appended here by JS / JS 将在此处附加图像 -->
             </div>
             <!-- Output Actions -->
+            <!-- 输出操作 -->
             <div class="output-actions">
-                <span class="version-info-footer">Kerry, Ver. 2.0.0</span> <!-- Updated Version -->
-                <button id="save-btn">保存</button>
-                <button id="save-large-btn">放大并保存</button>
+                <!-- Version info moved here for better alignment -->
+                <!-- 版本信息移至此处以更好地对齐 -->
+                <span class="version-info-footer">Kerry, Ver. 3.0.0 NodeBridge</span>
+                <button id="save-btn" disabled>保存 (Save)</button>
+                <button id="save-large-btn" disabled>放大保存 (Upscale)</button>
             </div>
         </div> <!-- End main-content -->
     </div> <!-- End container -->
 
     <!-- Log Footer Element -->
+    <!-- 日志页脚元素 -->
     <div class="log-footer" id="log-footer">
-        <span id="backend-log-display" class="disconnected">等待连接...</span>
+        <span id="backend-log-display" class="disconnected">等待连接 (Waiting for connection)...</span>
     </div>
 
-    <!-- Embedded JavaScript (Significant Changes) -->
-    <!-- 嵌入的 JavaScript（重大更改） -->
+    <!-- Embedded JavaScript (Significant Changes for NodeBridge) -->
+    <!-- 嵌入的 JavaScript（NodeBridge 的重大更改） -->
     <script>
     // --- Global variables ---
+    // --- 全局变量 ---
     let comfyUIStatusIndicatorTimeout = null;
-    let mainSocket = null; // Main connection to Flask backend
-    let clientId = null; // User's unique SocketIO session ID
-    let currentBackendPromptId = null; // Prompt ID tracked by the backend/frontend interaction
-    let isRendering = false; // Flag to prevent concurrent renders
+    let mainSocket = null; // Main connection to Flask backend / 与 Flask 后端的主连接
+    let clientId = null; // User's unique SocketIO session ID / 用户的唯一 SocketIO 会话 ID
+    let currentBackendPromptId = null; // Prompt ID tracked by the backend/frontend interaction / 后端/前端交互跟踪的提示 ID
+    let isRendering = false; // Flag to prevent concurrent renders / 防止并发渲染的标志
 
     // --- Configuration ---
+    // --- 配置 ---
     // Assuming Flask runs on the same host/port as the page is served from
     // 假设 Flask 在提供页面的同一主机/端口上运行
     const APP_API_BASE = window.location.origin;
-    // ComfyUI view URL (assuming standard port or adjust if needed)
-    // ComfyUI 查看 URL（假设使用标准端口，或根据需要调整）
-    const COMFYUI_API_PORT = {{ comfyui_api_port | default(8188) }}; // Get from Flask template or default
-    const COMFYUI_VIEW_URL_BASE = `http://${window.location.hostname}:${COMFYUI_API_PORT}/view`;
+    // ComfyUI view URL (Get port from Flask template context)
+    // ComfyUI 查看 URL（从 Flask 模板上下文获取端口）
+    const COMFYUI_API_PORT = {{ comfyui_api_port | default(8188) }}; // Default if not provided / 如果未提供则为默认值
+    const COMFYUI_HOST = window.location.hostname; // Use current hostname / 使用当前主机名
+    const COMFYUI_VIEW_URL_BASE = `http://${COMFYUI_HOST}:${COMFYUI_API_PORT}/view`;
+
+    // --- DOM Element References ---
+    // --- DOM 元素引用 ---
+    // It's good practice to get references once the DOM is loaded
+    // 最佳实践是在 DOM 加载后获取引用
+    let outputArea, outputPlaceholder, workflowSelect, renderBtn,
+        lineartInput, lineartPreview, lineartUploadBox,
+        referenceInput, referencePreview, referenceUploadBox,
+        textPromptInput, strengthSlider, strengthValueSpan,
+        countSlider, countValueSpan, saveBtn, saveLargeBtn,
+        editToolbarElement, workflowErrorDiv, logDisplay, statusIndicator;
+
+    function getAllElementRefs() {
+        outputArea = document.getElementById('output-area');
+        outputPlaceholder = outputArea?.querySelector('.output-placeholder');
+        workflowSelect = document.getElementById('workflow-select');
+        renderBtn = document.getElementById('render-button');
+        lineartInput = document.getElementById('lineart-upload');
+        lineartPreview = document.getElementById('lineart-preview');
+        lineartUploadBox = document.getElementById('lineart-upload-box'); // Get the box itself / 获取框本身
+        referenceInput = document.getElementById('reference-upload');
+        referencePreview = document.getElementById('reference-preview');
+        referenceUploadBox = document.getElementById('reference-upload-box'); // Get the box itself / 获取框本身
+        textPromptInput = document.getElementById('text-prompt');
+        strengthSlider = document.getElementById('control-strength');
+        strengthValueSpan = document.getElementById('control-strength-value');
+        countSlider = document.getElementById('card-count'); // Corrected ID / 修正了 ID
+        countValueSpan = document.getElementById('card-count-value'); // Corrected ID / 修正了 ID
+        saveBtn = document.getElementById('save-btn');
+        saveLargeBtn = document.getElementById('save-large-btn');
+        editToolbarElement = document.getElementById('edit-toolbar');
+        workflowErrorDiv = document.getElementById('workflow-error');
+        logDisplay = document.getElementById('backend-log-display');
+        statusIndicator = document.getElementById('comfyui-status-indicator');
+    }
 
 
     // --- Helper Functions ---
+    // --- 辅助函数 ---
+
     /** Reads file as Base64 Data URL */
+    /** 将文件读取为 Base64 数据 URL */
     function readFileAsBase64(file) {
         return new Promise((resolve, reject) => {
-            if (!file) { return resolve(null); } // Handle no file case
+            if (!file) { return resolve(null); } // Handle no file case / 处理无文件的情况
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result);
             reader.onerror = (error) => { console.error("File Read Error:", error); reject(error); };
@@ -247,147 +318,139 @@
     }
 
     /** Updates the log footer text and style */
+    /** 更新日志页脚文本和样式 */
     function updateFooter(text, statusClass = 'idle') {
-        const display = document.getElementById('backend-log-display');
-        if (display) {
-            display.textContent = text;
-            const classes = ['idle', 'connecting', 'connected', 'progress', 'disconnected', 'error', 'busy']; // Added busy
-            display.classList.remove(...classes);
-            if (statusClass) display.classList.add(statusClass);
+        if (logDisplay) {
+            logDisplay.textContent = text;
+            // Clear previous classes and add the new one / 清除以前的类并添加新的类
+            logDisplay.className = ''; // Remove all classes first / 首先移除所有类
+            logDisplay.classList.add(statusClass); // Add the desired class / 添加所需的类
         }
-        // Show errors also in the dedicated workflow error div if relevant
-        // 如果相关，也在专用的工作流错误 div 中显示错误
-        const wfErrorDiv = document.getElementById('workflow-error');
-        if (wfErrorDiv) {
+        // Show errors also in the dedicated workflow error div if relevant / 如果相关，也在专用的工作流错误 div 中显示错误
+        if (workflowErrorDiv) {
             if (statusClass === 'error') {
-                 wfErrorDiv.textContent = text;
+                 workflowErrorDiv.textContent = text;
+            } else if (workflowErrorDiv.textContent.startsWith("加载工作流出错") || workflowErrorDiv.textContent.startsWith("加载工作流失败")) {
+                 // Don't clear persistent load errors / 不清除持久的加载错误
             } else {
-                 wfErrorDiv.textContent = ''; // Clear if not an error
+                 workflowErrorDiv.textContent = ''; // Clear runtime errors if status is not error / 如果状态不是错误，则清除运行时错误
             }
         }
-
     }
 
     /** Updates top-right status indicator */
-    function updateStatusIndicator(message, type = 'busy') {
-        const indicator = document.getElementById('comfyui-status-indicator');
-        if (!indicator) return;
-        indicator.textContent = message;
-        indicator.className = 'visible ' + type;
+    /** 更新右上角状态指示器 */
+    function updateStatusIndicator(message, type = 'busy', sticky = false) {
+        if (!statusIndicator) return;
+        statusIndicator.textContent = message;
+        statusIndicator.className = 'visible ' + type; // Set class based on type / 根据类型设置类
+
         if (comfyUIStatusIndicatorTimeout) clearTimeout(comfyUIStatusIndicatorTimeout);
-        const hideDelay = (type === 'ready' || type === 'error') ? 5000 : 4000; // Longer display for final states/errors
-        comfyUIStatusIndicatorTimeout = setTimeout(() => indicator.classList.remove('visible'), hideDelay);
+
+        if (!sticky) { // Auto-hide after delay unless sticky / 除非 sticky，否则延迟后自动隐藏
+             const hideDelay = (type === 'ready' || type === 'error') ? 5000 : 4000; // Longer display for final states/errors / 最终状态/错误显示时间更长
+             comfyUIStatusIndicatorTimeout = setTimeout(() => {
+                 statusIndicator.classList.remove('visible');
+                 statusIndicator.className = ''; // Clear class when hidden / 隐藏时清除类
+                 }, hideDelay);
+        }
     }
 
-     /** Hides top-right status indicator */
+     /** Hides top-right status indicator immediately */
+     /** 立即隐藏右上角状态指示器 */
     function hideStatusIndicator() {
-         const indicator = document.getElementById('comfyui-status-indicator');
-         if (indicator) {
-             if (comfyUIStatusIndicatorTimeout) clearTimeout(comfyUIStatusIndicatorTimeout);
-             indicator.className = '';
-         }
+         if (!statusIndicator) return;
+         if (comfyUIStatusIndicatorTimeout) clearTimeout(comfyUIStatusIndicatorTimeout);
+         statusIndicator.classList.remove('visible');
+         statusIndicator.className = ''; // Clear classes / 清除类
      }
 
-    /** Displays the final rendered image */
-     function displayOutputImage(base64ImageData) {
-        const outputArea = document.getElementById('output-area');
-        const placeholder = outputArea?.querySelector('.output-placeholder');
-        const resultWrapper = outputArea?.querySelector('.output-result-wrapper');
-        const resultLayerImg = resultWrapper?.querySelector('#output-result-layer img');
-
-        if (!resultLayerImg || !resultWrapper || !placeholder) {
+    /** Displays the final rendered image(s) */
+    /** 显示最终渲染的图像 */
+     function displayOutputImages(base64ImageArray) {
+        if (!outputArea || !outputPlaceholder) {
             console.error("Output display elements not found!");
             updateFooter("前端错误：无法显示输出", 'error');
             return;
         }
 
-        if (base64ImageData) {
-            placeholder.style.display = 'none';
-            // Preload image
-            const tempImg = new Image();
-            tempImg.onload = () => {
-                 resultLayerImg.src = base64ImageData;
-                 resultWrapper.style.display = 'block';
-                 console.log("Output image displayed.");
-                 updateStatusIndicator('渲染完成', 'ready');
-                 updateFooter('渲染完成', 'idle'); // Reset footer to idle/connected
-                 isRendering = false; // Allow new render
-                 const renderBtn = document.getElementById('render-button');
-                 if (renderBtn) renderBtn.disabled = false; // Re-enable button
-            };
-            tempImg.onerror = () => {
-                console.error("Failed to load result image data.");
-                placeholder.textContent = "加载结果图像失败";
-                placeholder.style.display = 'flex';
-                resultWrapper.style.display = 'none';
-                updateFooter("加载结果图像失败", 'error');
-                isRendering = false; // Allow new render
-                const renderBtn = document.getElementById('render-button');
-                if (renderBtn) renderBtn.disabled = false; // Re-enable button
-            };
-            tempImg.src = base64ImageData;
+        // Clear previous output and hide placeholder / 清除以前的输出并隐藏占位符
+        outputArea.innerHTML = ''; // Clear previous images / 清除以前的图像
+        outputPlaceholder.style.display = 'none';
+
+        if (base64ImageArray && base64ImageArray.length > 0) {
+            base64ImageArray.forEach((base64ImageData, index) => {
+                const imgElement = document.createElement('img');
+                imgElement.src = base64ImageData;
+                imgElement.alt = `输出结果 ${index + 1} (Output ${index + 1})`;
+                // Styles applied via CSS (.output-area img) / 通过 CSS 应用样式 (.output-area img)
+                outputArea.appendChild(imgElement);
+            });
+            console.log(`Displayed ${base64ImageArray.length} output image(s).`);
+            updateStatusIndicator('渲染完成 (Render Complete)', 'ready');
+            updateFooter('渲染完成 (Render Complete)', 'idle'); // Reset footer to idle/connected / 将页脚重置为空闲/已连接
         } else {
-             // Handle case where no image data is received
-             placeholder.textContent = "未收到图像结果";
-             placeholder.style.display = 'flex';
-             resultWrapper.style.display = 'none';
+             // Handle case where no image data is received / 处理未收到图像数据的情况
+             outputPlaceholder.textContent = "未收到图像结果 (No image results received)";
+             outputPlaceholder.style.display = 'flex'; // Show placeholder again / 再次显示占位符
              console.warn("No image data received to display.");
-             updateFooter("未收到图像结果", 'idle');
-             isRendering = false; // Allow new render
-             const renderBtn = document.getElementById('render-button');
-             if (renderBtn) renderBtn.disabled = false; // Re-enable button
+             updateFooter("未收到图像结果 (No image results)", 'idle');
         }
+
+        // Reset rendering state and re-enable button / 重置渲染状态并重新启用按钮
+        isRendering = false;
+        updateRenderButtonState(); // Update button text and disabled state / 更新按钮文本和禁用状态
+        // Enable save buttons if there are results / 如果有结果，启用保存按钮
+        if (saveBtn) saveBtn.disabled = !(base64ImageArray && base64ImageArray.length > 0);
+        if (saveLargeBtn) saveLargeBtn.disabled = !(base64ImageArray && base64ImageArray.length > 0);
     }
 
     // --- Main Function to Handle Data Request from Backend ---
+    // --- 处理来自后端的请求的主要函数 ---
     async function handleDataRequest(requestData) {
         const { prompt_id, node_id, mode, request_id } = requestData;
         console.log(`<- Received data request from backend: mode=${mode}, req_id=${request_id}`);
-        updateFooter(`节点 ${node_id.substring(0,4)} 请求数据: ${mode}...`, 'busy'); // Inform user
+        updateFooter(`节点 ${node_id.substring(0,4)} 请求数据: ${mode}...`, 'busy'); // Inform user / 通知用户
+        updateStatusIndicator(`等待前端: ${mode} (Waiting: ${mode})`, 'busy', true); // Show sticky status / 显示粘性状态
 
         let dataToSend = null;
         let errorMsg = null;
 
         try {
             switch(mode) {
-                case 'Image':
-                    const lineartInput = document.getElementById('lineart-upload');
+                case 'Image': // Lineart / 线稿
                     if (lineartInput && lineartInput.files.length > 0) {
                         dataToSend = await readFileAsBase64(lineartInput.files[0]);
-                         if (!dataToSend) errorMsg = "无法读取线稿文件。";
+                         if (!dataToSend) errorMsg = "无法读取线稿文件 (Cannot read lineart file).";
                     } else {
-                         errorMsg = "未选择线稿图像。"; // User hasn't selected a file
-                         // dataToSend = null; // Send null explicitly
+                         errorMsg = "未选择线稿图像 (Lineart image not selected).";
+                         // Don't send null for required image / 不要为必需的图像发送 null
                     }
                     break;
-                case 'Reference':
-                    const refInput = document.getElementById('reference-upload');
-                     if (refInput && refInput.files.length > 0) {
-                        dataToSend = await readFileAsBase64(refInput.files[0]);
-                         if (!dataToSend) errorMsg = "无法读取参考文件。";
+                case 'Reference': // Reference Image / 参考图像
+                     if (referenceInput && referenceInput.files.length > 0) {
+                        dataToSend = await readFileAsBase64(referenceInput.files[0]);
+                         if (!dataToSend) errorMsg = "无法读取参考文件 (Cannot read reference file).";
                     } else {
-                         // It's okay if reference is optional, send null
+                         // It's okay if reference is optional, send null / 如果参考是可选的，可以发送 null
                          dataToSend = null;
                          console.log("No reference image selected, sending null.");
                     }
                     break;
-                case 'Text':
-                    const textInput = document.getElementById('text-prompt');
-                    dataToSend = textInput ? textInput.value : "";
+                case 'Text': // Text Prompt / 文字提示
+                    dataToSend = textPromptInput ? textPromptInput.value : "";
                     break;
-                case 'CN':
-                    const cnInput = document.getElementById('control-strength');
-                    // Send as number, backend expects float
-                    dataToSend = cnInput ? parseFloat(cnInput.value) : 1.0;
+                case 'CN': // Control Strength / 控制强度
+                    // Send as number, backend expects float / 作为数字发送，后端期望浮点数
+                    dataToSend = strengthSlider ? parseFloat(strengthSlider.value) : 1.0;
                     break;
-                case 'Count':
-                    const countInput = document.getElementById('card-count');
-                     // Send as number, backend expects int
-                    dataToSend = countInput ? parseInt(countInput.value, 10) : 1;
+                case 'Count': // Batch Count / 批次数
+                     // Send as number, backend expects int / 作为数字发送，后端期望整数
+                    dataToSend = countSlider ? parseInt(countSlider.value, 10) : 1;
                     break;
                 default:
                     console.error(`Unknown data request mode: ${mode}`);
-                    errorMsg = `未知的数据请求模式: ${mode}`;
+                    errorMsg = `未知的数据请求模式 (Unknown data request mode): ${mode}`;
             }
         } catch (error) {
              console.error(`Error preparing data for mode ${mode}:`, error);
@@ -396,20 +459,23 @@
 
 
         // --- Send Data (or error) Back to Backend ---
+        // --- 将数据（或错误）发送回后端 ---
         const responsePayload = {
-            prompt_id: prompt_id,
-            node_id: node_id,
-            mode: mode,
-            request_id: request_id, // Include the request_id
-            data: dataToSend,       // This will be null if file reading failed or not selected
-            error: errorMsg         // Include error message if any
+            // No need to send prompt_id/node_id back, backend knows from request_id / 无需发送回 prompt_id/node_id，后端从 request_id 知道
+            request_id: request_id, // MUST include the request_id / 必须包含 request_id
+            mode: mode,             // Include mode for context / 包含模式作为上下文
+            data: dataToSend,       // This will be null if file reading failed or not selected (except required Image) / 如果文件读取失败或未选择（必需的图像除外），则为 null
+            error: errorMsg         // Include error message if any / 如果有任何错误，包含错误消息
         };
 
         if (errorMsg) {
             console.warn(`-> Sending error back for request ${request_id}: ${errorMsg}`);
-            updateFooter(`错误: ${errorMsg}`, 'error'); // Show error to user
+            updateFooter(`错误: ${errorMsg}`, 'error'); // Show error to user / 向用户显示错误
+            updateStatusIndicator(`提供数据错误 (Data Error): ${mode}`, 'error'); // Update status / 更新状态
         } else {
             console.log(`-> Sending data back for request ${request_id}, mode=${mode}`);
+            updateFooter(`数据已发送 (${mode})`, 'progress'); // Or 'idle' or 'connected' depending on state / 或“空闲”或“已连接”，取决于状态
+            updateStatusIndicator(`数据已发送 (${mode})`, 'busy'); // Keep busy until next update / 保持忙碌直到下一次更新
         }
 
         if(mainSocket && mainSocket.connected) {
@@ -417,259 +483,280 @@
         } else {
              console.error("Cannot send data back, socket not connected.");
              updateFooter("连接错误，无法发送数据", 'disconnected');
-        }
-
-        // Update footer after sending data/error
-        if (!errorMsg) {
-             updateFooter(`数据已发送 (${mode})`, 'progress'); // Or 'idle' or 'connected' depending on state
+             updateStatusIndicator(`连接错误 (Connection Error)`, 'error');
         }
     }
 
 
     // --- WebSocket Setup ---
+    // --- WebSocket 设置 ---
     function connectWebSocket() {
         if (mainSocket && mainSocket.connected) {
             console.log("WebSocket already connected.");
             return;
         }
 
-        // Disconnect previous socket if exists
+        // Disconnect previous socket if exists / 如果存在，则断开先前的套接字
         if (mainSocket) { mainSocket.disconnect(); }
 
         console.log("Attempting to connect WebSocket to Backend...");
         updateFooter("正在连接服务器...", 'connecting');
+        updateStatusIndicator('连接中...', 'busy', true); // Sticky connecting status / 粘性连接状态
         mainSocket = io.connect(APP_API_BASE, {
             reconnectionAttempts: 5,
             reconnectionDelay: 3000,
-        }); // Connect to Flask-SocketIO server
+            timeout: 10000, // Connection timeout / 连接超时
+        }); // Connect to Flask-SocketIO server / 连接到 Flask-SocketIO 服务器
 
         mainSocket.on('connect', () => {
             clientId = mainSocket.id;
             console.log('WebSocket Connected to Backend. Client ID:', clientId);
-            updateFooter('已连接', 'connected');
-            // Enable render button potentially (if workflow selected)
-            const workflowSelect = document.getElementById('workflow-select');
-            const renderBtn = document.getElementById('render-button');
-            if(renderBtn) renderBtn.disabled = !(workflowSelect && workflowSelect.value);
+            updateFooter('已连接 (Connected)', 'connected');
+            updateStatusIndicator('已连接 (Connected)', 'ready'); // Show ready briefly / 短暂显示就绪
+            // Enable render button potentially (if workflow selected) / 可能启用渲染按钮（如果选择了工作流）
+            updateRenderButtonState();
         });
 
         mainSocket.on('disconnect', (reason) => {
             console.log('WebSocket Disconnected from Backend. Reason:', reason);
             clientId = null;
             updateFooter(`已断开: ${reason}`, 'disconnected');
-            // Disable render button
-            const renderBtn = document.getElementById('render-button');
-            if(renderBtn) renderBtn.disabled = true;
-            isRendering = false; // Reset rendering flag
+            updateStatusIndicator('已断开 (Disconnected)', 'error', true); // Sticky error / 粘性错误
+            isRendering = false; // Reset rendering flag / 重置渲染标志
+            updateRenderButtonState(); // Disable button / 禁用按钮
         });
 
         mainSocket.on('connect_error', (error) => {
             console.error('WebSocket Connection Error:', error);
-            updateFooter('连接错误', 'disconnected');
-            const renderBtn = document.getElementById('render-button');
-            if(renderBtn) renderBtn.disabled = true;
+            updateFooter('连接错误 (Connection Error)', 'error');
+            updateStatusIndicator(`连接错误: ${error.message}`, 'error', true); // Sticky error / 粘性错误
+            isRendering = false;
+            updateRenderButtonState(); // Disable button / 禁用按钮
         });
 
         // --- Listen for messages from backend ---
+        // --- 监听来自后端的消息 ---
 
-        // Listen for final render results
+        // Listen for final render results / 监听最终渲染结果
         mainSocket.on('render_result', (data) => {
             console.log('<- Received final render result:', data);
-            if (data.images && data.images.length > 0) {
-                displayOutputImage(data.images[0]); // Display the first image
-            } else {
-                 console.warn("Render result received, but no images found.");
-                 displayOutputImage(null); // Show placeholder with message
-            }
-             // isRendering and button state handled within displayOutputImage
+            // Expect data.images to be an array of base64 strings / 期望 data.images 是 base64 字符串数组
+            displayOutputImages(data.images || []);
+            // isRendering and button state handled within displayOutputImages / isRendering 和按钮状态在 displayOutputImages 内处理
         });
 
-        // Listen for errors during rendering process
+        // Listen for errors during rendering process / 监听渲染过程中的错误
         mainSocket.on('render_error', (data) => {
             console.error('<- Received render error:', data);
-            updateFooter(`渲染错误: ${data.message}`, 'error');
-            updateStatusIndicator('渲染失败', 'error');
-            isRendering = false; // Allow new render attempt
-            const renderBtn = document.getElementById('render-button');
-            if (renderBtn) renderBtn.disabled = false; // Re-enable button
-            // Show placeholder in output area
-            const outputArea = document.getElementById('output-area');
-            const placeholder = outputArea?.querySelector('.output-placeholder');
-            const resultWrapper = outputArea?.querySelector('.output-result-wrapper');
-            if(placeholder) { placeholder.textContent = `渲染错误: ${data.message}`; placeholder.style.display = 'flex'; }
-            if(resultWrapper) resultWrapper.style.display = 'none';
+            const errorText = `渲染错误: ${data.message}`;
+            updateFooter(errorText, 'error');
+            updateStatusIndicator('渲染失败 (Render Failed)', 'error');
+            isRendering = false; // Allow new render attempt / 允许新的渲染尝试
+            updateRenderButtonState(); // Re-enable button / 重新启用按钮
 
+            // Show placeholder in output area with error / 在输出区域显示带有错误的占位符
+            if(outputArea && outputPlaceholder) {
+                 outputPlaceholder.textContent = errorText;
+                 outputPlaceholder.style.display = 'flex';
+                 outputArea.innerHTML = ''; // Clear any previous potentially broken images / 清除任何以前可能损坏的图像
+                 outputArea.appendChild(outputPlaceholder); // Add placeholder back / 添加回占位符
+            }
+             // Disable save buttons on error / 出错时禁用保存按钮
+             if(saveBtn) saveBtn.disabled = true;
+             if(saveLargeBtn) saveLargeBtn.disabled = true;
         });
 
-        // Listen for general status updates
+        // Listen for general status updates / 监听一般状态更新
         mainSocket.on('status_update', (data) => {
-            console.log('<- Status update:', data.status);
-            updateFooter(data.status, 'progress'); // Use progress style for most updates
+            const statusText = data.status || "未知状态 (Unknown status)";
+            console.log('<- Status update:', statusText);
+            // Use 'progress' class for most intermediate steps / 对大多数中间步骤使用“progress”类
+            updateFooter(statusText, 'progress');
+             // Update indicator based on content / 根据内容更新指示器
+             if (statusText.includes("Executing") || statusText.includes("执行节点")) {
+                 updateStatusIndicator(statusText, 'busy', true); // Sticky while executing / 执行时粘性
+             } else if (statusText.includes("Waiting") || statusText.includes("等待")) {
+                 updateStatusIndicator(statusText, 'busy', true); // Sticky while waiting for input / 等待输入时粘性
+             } else if (statusText.includes("Queued") || statusText.includes("队列")) {
+                 updateStatusIndicator(statusText, 'busy');
+             } else if (statusText.includes("Idle") || statusText.includes("空闲")) {
+                 updateStatusIndicator(statusText, 'ready'); // Show idle briefly / 短暂显示空闲
+             } else {
+                 updateStatusIndicator(statusText, 'busy'); // Default to busy / 默认为忙碌
+             }
         });
 
-        // Listen for progress updates (optional, if backend sends them)
+        // Listen for progress updates (optional, if backend sends them) / 监听进度更新（可选，如果后端发送）
         mainSocket.on('progress_update', (data) => {
              const { progress, total, percent } = data;
-             // console.log(`<- Progress: ${progress}/${total} (${percent}%)`); // Can be noisy
-             updateFooter(`进度: ${progress}/${total} (${percent}%)`, 'progress');
+             const progressText = `进度: ${progress}/${total} (${percent}%)`;
+             // console.log(`<- Progress: ${progressText}`); // Can be noisy / 可能很嘈杂
+             updateFooter(progressText, 'progress');
+             updateStatusIndicator(progressText, 'busy'); // Show progress / 显示进度
         });
 
         // *** NEW: Listen for data requests relayed from the backend ***
+        // *** 新增：监听从后端转发的数据请求 ***
         mainSocket.on('request_data_for_frontend', handleDataRequest);
 
     }
 
 
-    // --- DOM Initialization ---
+    // --- DOM Initialization & Event Listeners ---
+    // --- DOM 初始化和事件监听器 ---
     document.addEventListener('DOMContentLoaded', () => {
         console.log("DOM fully loaded");
-
-        // --- Get Element References ---
-        const outputArea = document.getElementById('output-area');
-        const outputPlaceholder = outputArea?.querySelector('.output-placeholder');
-        const resultWrapper = outputArea?.querySelector('.output-result-wrapper');
-        const resultLayerImg = resultWrapper?.querySelector('#output-result-layer img');
-        const workflowSelect = document.getElementById('workflow-select');
-        const renderBtn = document.getElementById('render-button');
-        const lineartInput = document.getElementById('lineart-upload');
-        const lineartPreview = document.getElementById('lineart-preview');
-        const referenceInput = document.getElementById('reference-upload');
-        const referencePreview = document.getElementById('reference-preview');
-        const textPromptInput = document.getElementById('text-prompt');
-        const strengthSlider = document.getElementById('control-strength');
-        const strengthValueSpan = document.getElementById('control-strength-value');
-        const countSlider = document.getElementById('card-count');
-        const countValueSpan = document.getElementById('card-count-value');
-        const saveBtn = document.getElementById('save-btn');
-        const saveLargeBtn = document.getElementById('save-large-btn');
-        const editToolbarElement = document.getElementById('edit-toolbar');
+        // Get element references now that DOM is ready / DOM 就绪后获取元素引用
+        getAllElementRefs();
 
         // --- Initial UI State & Workflow Loading ---
-        function updateRenderButtonState() {
-            if (renderBtn) {
-                const wfSelected = workflowSelect && workflowSelect.value;
-                renderBtn.disabled = !wfSelected || isRendering || !mainSocket || !mainSocket.connected;
-                if (!wfSelected) {
-                     renderBtn.textContent = '选择工作流后可用';
-                } else if (isRendering) {
-                     renderBtn.textContent = '渲染中...';
-                } else if (!mainSocket || !mainSocket.connected) {
-                     renderBtn.textContent = '连接中...';
-                } else {
-                     renderBtn.textContent = '渲染 (Render)';
-                }
-            }
-         }
+        // --- 初始 UI 状态和工作流加载 ---
+        updateRenderButtonState(); // Set initial button state / 设置初始按钮状态
+        if(saveBtn) saveBtn.disabled = true; // Disable save buttons initially / 初始禁用保存按钮
+        if(saveLargeBtn) saveLargeBtn.disabled = true;
 
-        if (workflowSelect) {
+        if (workflowSelect && workflowErrorDiv) {
              workflowSelect.addEventListener('change', updateRenderButtonState);
-             // Fetch workflow options
+             // Fetch workflow options / 获取工作流选项
              fetch('/api/workflows')
                  .then(res => {
-                     if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+                     if (!res.ok) {
+                         // Try to get error message from response body / 尝试从响应体获取错误消息
+                         return res.json().then(errData => {
+                             throw new Error(errData.error || `HTTP error! status: ${res.status}`);
+                         }).catch(() => {
+                             // Fallback if response body is not JSON or empty / 如果响应体不是 JSON 或为空，则回退
+                             throw new Error(`HTTP error! status: ${res.status}`);
+                         });
+                     }
                      return res.json();
                  })
                  .then(data => {
-                     const errorDiv = document.getElementById('workflow-error');
-                     if (errorDiv) errorDiv.textContent = ''; // Clear previous errors
-                     if (data.workflows) {
-                         workflowSelect.innerHTML = '<option value="">--请选择--</option>';
+                     workflowErrorDiv.textContent = ''; // Clear previous errors / 清除以前的错误
+                     if (data.workflows && Array.isArray(data.workflows)) {
+                         workflowSelect.innerHTML = '<option value="">--请选择工作流--</option>'; // Placeholder / 占位符
                          data.workflows.forEach(wfPath => {
                              const option = document.createElement('option');
-                             option.value = wfPath; // Value is the relative path
-                             // Display a cleaner name (e.g., subdir/name)
+                             option.value = wfPath; // Value is the relative path / 值是相对路径
+                             // Display a cleaner name (e.g., subdir/name) / 显示更清晰的名称（例如，subdir/name）
                              option.textContent = wfPath.replace('.json', '').replace(/\\/g, '/');
                              workflowSelect.appendChild(option);
                          });
+                         console.log(`Loaded ${data.workflows.length} workflows.`);
                      } else if (data.error) {
-                         if (errorDiv) errorDiv.textContent = `加载工作流失败: ${data.error}`;
+                         workflowErrorDiv.textContent = `加载工作流失败: ${data.error}`;
                          console.error("Workflow load error:", data.error);
+                         workflowSelect.innerHTML = '<option value="">--加载失败--</option>'; // Error state / 错误状态
+                     } else {
+                          workflowErrorDiv.textContent = '加载工作流失败：格式无效。';
+                          console.error("Invalid workflow data format:", data);
+                          workflowSelect.innerHTML = '<option value="">--格式错误--</option>'; // Error state / 错误状态
                      }
                  })
                  .catch(err => {
-                     const errorDiv = document.getElementById('workflow-error');
-                     if (errorDiv) errorDiv.textContent = `加载工作流出错: ${err.message}`;
+                     workflowErrorDiv.textContent = `加载工作流出错: ${err.message}. 请检查后端服务和路径。`;
                      console.error("Workflow fetch error:", err);
+                     workflowSelect.innerHTML = '<option value="">--加载出错--</option>'; // Error state / 错误状态
                  })
                  .finally(() => {
-                     updateRenderButtonState(); // Update button state after fetch attempt
+                     updateRenderButtonState(); // Update button state after fetch attempt / 获取尝试后更新按钮状态
                  });
-        } else { console.error("Workflow select not found"); }
+        } else {
+             console.error("Workflow select or error div not found");
+             if(renderBtn) renderBtn.textContent = "页面错误";
+        }
 
         // --- Input Setup (Previews and Live Value Display) ---
-        function setupPreview(inputId, previewId) {
-            const input = document.getElementById(inputId);
-            const preview = document.getElementById(previewId);
-            if (input && preview) {
-                input.addEventListener('change', async (event) => {
+        // --- 输入设置（预览和实时值显示）---
+        function setupPreview(inputElement, previewElement, uploadBoxElement) {
+            if (inputElement && previewElement && uploadBoxElement) {
+                inputElement.addEventListener('change', async (event) => {
                     const file = event.target.files[0];
-                    const uploadBox = input.closest('.upload-box');
-                    if (uploadBox) uploadBox.classList.remove('success', 'error'); // Reset visual state
+                    // Reset visual state / 重置视觉状态
+                    uploadBoxElement.classList.remove('success', 'error', 'has-preview');
+                    previewElement.style.display = 'none';
 
                     if (file && file.type.startsWith('image/')) {
                         try {
-                            preview.src = await readFileAsBase64(file);
-                            preview.style.display = 'block';
-                             if (uploadBox) uploadBox.classList.add('success'); // Mark as visually successful selection
+                            previewElement.src = await readFileAsBase64(file);
+                            previewElement.style.display = 'block';
+                            uploadBoxElement.classList.add('success', 'has-preview'); // Mark success and preview / 标记成功和预览
                         } catch (e) {
-                            preview.src = '#';
-                            preview.style.display = 'none';
-                             if (uploadBox) uploadBox.classList.add('error');
-                            updateFooter("无法预览图像", 'error');
+                            previewElement.src = '#';
+                            previewElement.style.display = 'none';
+                            uploadBoxElement.classList.add('error');
+                            updateFooter("无法预览图像 (Cannot preview image)", 'error');
                         }
                     } else {
-                        preview.src = '#';
-                        preview.style.display = 'none';
-                        if (file) { // If a file was selected but wasn't an image
-                             if (uploadBox) uploadBox.classList.add('error');
-                             updateFooter("请选择图像文件", 'error');
+                        previewElement.src = '#';
+                        previewElement.style.display = 'none';
+                        if (file) { // If a file was selected but wasn't an image / 如果选择了文件但不是图像
+                             uploadBoxElement.classList.add('error');
+                             updateFooter("请选择图像文件 (Please select an image file)", 'error');
                         }
                     }
                 });
+            } else {
+                 console.warn("Missing elements for preview setup:", inputElement, previewElement, uploadBoxElement);
             }
         }
-        setupPreview('lineart-upload', 'lineart-preview');
-        setupPreview('reference-upload', 'reference-preview');
+        // Pass the actual elements to the setup function / 将实际元素传递给设置函数
+        setupPreview(lineartInput, lineartPreview, lineartUploadBox);
+        setupPreview(referenceInput, referencePreview, referenceUploadBox);
 
-        function setupSliderDisplay(sliderId, displayId, decimalPlaces = 0) {
-            const slider = document.getElementById(sliderId);
-            const display = document.getElementById(displayId);
-            if (slider && display) {
+        function setupSliderDisplay(sliderElement, displayElement, decimalPlaces = 0) {
+            if (sliderElement && displayElement) {
                 const updateDisplay = () => {
-                    display.textContent = parseFloat(slider.value).toFixed(decimalPlaces);
+                    displayElement.textContent = parseFloat(sliderElement.value).toFixed(decimalPlaces);
                 };
-                slider.addEventListener('input', updateDisplay);
-                updateDisplay(); // Set initial value
+                sliderElement.addEventListener('input', updateDisplay);
+                updateDisplay(); // Set initial value / 设置初始值
             }
         }
-        setupSliderDisplay('control-strength', 'control-strength-value', 2); // 2 decimal places
-        setupSliderDisplay('card-count', 'card-count-value', 0); // 0 decimal places
+        setupSliderDisplay(strengthSlider, strengthValueSpan, 2); // 2 decimal places / 2 位小数
+        setupSliderDisplay(countSlider, countValueSpan, 0); // 0 decimal places / 0 位小数
 
 
         // --- Render Button Click Listener ---
+        // --- 渲染按钮点击监听器 ---
         if (renderBtn && workflowSelect) {
             renderBtn.addEventListener('click', async () => {
-                if (renderBtn.disabled || isRendering) return; // Extra check
+                if (renderBtn.disabled || isRendering) {
+                    console.log("Render button clicked but disabled or already rendering.");
+                    return; // Extra check / 额外检查
+                }
 
                 const selectedWorkflowKey = workflowSelect.value;
-                if (!selectedWorkflowKey) { updateFooter("请先选择工作流。", 'error'); return; }
-                if (!mainSocket || !mainSocket.connected) { updateFooter("未连接到服务器。", 'error'); return; }
+                if (!selectedWorkflowKey) { updateFooter("请先选择工作流 (Please select a workflow first).", 'error'); return; }
+                if (!mainSocket || !mainSocket.connected) { updateFooter("未连接到服务器 (Not connected to server).", 'error'); return; }
+                if (!clientId) { updateFooter("无效的客户端连接，请刷新 (Invalid client connection, please refresh).", 'error'); return; }
 
-                isRendering = true; // Set rendering flag
-                renderBtn.disabled = true;
-                renderBtn.textContent = '渲染中...';
-                updateFooter('开始渲染...', 'busy');
-                updateStatusIndicator('开始渲染', 'busy');
-                 const wfErrorDiv = document.getElementById('workflow-error');
-                 if(wfErrorDiv) wfErrorDiv.textContent = ''; // Clear errors
-                 if (outputPlaceholder) { outputPlaceholder.textContent = '正在初始化...'; outputPlaceholder.style.display = 'flex'; }
-                 if (resultWrapper) resultWrapper.style.display = 'none';
+
+                isRendering = true; // Set rendering flag / 设置渲染标志
+                updateRenderButtonState(); // Update button text/state / 更新按钮文本/状态
+                updateFooter('开始渲染 (Starting render)...', 'busy');
+                updateStatusIndicator('开始渲染 (Starting...)', 'busy', true);
+                if(workflowErrorDiv) workflowErrorDiv.textContent = ''; // Clear errors / 清除错误
+                 // Clear previous results and show placeholder / 清除以前的结果并显示占位符
+                 if(outputArea) outputArea.innerHTML = '';
+                 if(outputPlaceholder) {
+                     outputPlaceholder.textContent = '正在初始化 (Initializing)...';
+                     outputPlaceholder.style.display = 'flex';
+                      // Ensure placeholder is re-added if cleared / 确保在清除后重新添加占位符
+                      if (!outputArea.contains(outputPlaceholder)) {
+                          outputArea.appendChild(outputPlaceholder);
+                      }
+                 }
+                 // Disable save buttons during render / 渲染期间禁用保存按钮
+                 if(saveBtn) saveBtn.disabled = true;
+                 if(saveLargeBtn) saveLargeBtn.disabled = true;
 
 
                 // --- Trigger prompt via Flask backend ---
+                // --- 通过 Flask 后端触发提示 ---
                 const payload = {
-                    clientId: clientId, // Send our client ID
-                    workflow_key: selectedWorkflowKey
+                    clientId: clientId, // Send our client ID / 发送我们的客户端 ID
+                    workflow_key: selectedWorkflowKey // Send the selected workflow path/key / 发送选定的工作流路径/密钥
                 };
                 console.log('-> Sending trigger request to backend:', payload);
 
@@ -682,39 +769,71 @@
                     const result = await response.json();
 
                     if (!response.ok || !result.success) {
-                        throw new Error(result.message || `HTTP error ${response.status}`);
+                        // Throw error using message from backend / 使用来自后端的消息抛出错误
+                        throw new Error(result.message || `触发请求失败 (Trigger request failed): ${response.status}`);
                     }
 
                     console.log('<- Backend Trigger Request Success:', result);
-                    currentBackendPromptId = result.prompt_id; // Store the prompt ID we are tracking
-                    updateFooter('任务已提交，等待 ComfyUI...', 'progress');
-                    // Now wait for WebSocket messages (status, data requests, results)
-                    // 现在等待 WebSocket 消息（状态、数据请求、结果）
+                    currentBackendPromptId = result.prompt_id; // Store the prompt ID we are tracking / 存储我们正在跟踪的提示 ID
+                    updateFooter('任务已提交，等待 ComfyUI 处理 (Task submitted, waiting for ComfyUI)...', 'progress');
+                    // Now wait for WebSocket messages (status, data requests, results) / 现在等待 WebSocket 消息（状态、数据请求、结果）
 
                 } catch (error) {
                     console.error('Error triggering prompt:', error);
                     updateFooter(`触发失败: ${error.message}`, 'error');
-                    updateStatusIndicator('触发失败', 'error');
-                    isRendering = false; // Reset flag on error
-                    renderBtn.disabled = false; // Re-enable button
-                    renderBtn.textContent = '渲染 (Render)';
-                    if (outputPlaceholder) outputPlaceholder.textContent = `触发失败`;
+                    updateStatusIndicator('触发失败 (Trigger Failed)', 'error');
+                    isRendering = false; // Reset flag on error / 出错时重置标志
+                    updateRenderButtonState(); // Re-enable button / 重新启用按钮
+                    if (outputPlaceholder) outputPlaceholder.textContent = `触发失败 (Trigger failed)`;
                 }
             });
         } else {
              console.error("Initialization Error: Cannot find render button or workflow select.");
+             if(renderBtn) renderBtn.textContent = "页面错误";
         }
 
         // --- Other Button Listeners (Placeholders) ---
-        if(saveBtn) saveBtn.addEventListener('click', () => { console.log('Save clicked'); updateFooter("保存功能未实现", 'idle'); });
-        if(saveLargeBtn) saveLargeBtn.addEventListener('click', () => { console.log('Save Large clicked'); updateFooter("放大并保存功能未实现", 'idle'); });
-        if (editToolbarElement) { editToolbarElement.querySelectorAll('.edit-icon').forEach((icon, index) => { icon.addEventListener('click', () => { console.log(`Edit Icon ${index + 1} clicked`); updateFooter(`编辑工具 ${index+1} 未实现`, 'idle'); }); }); }
+        // --- 其他按钮监听器（占位符）---
+        if(saveBtn) saveBtn.addEventListener('click', () => { console.log('Save clicked'); updateFooter("保存功能未实现 (Save function not implemented)", 'idle'); });
+        if(saveLargeBtn) saveLargeBtn.addEventListener('click', () => { console.log('Save Large clicked'); updateFooter("放大并保存功能未实现 (Upscale & Save not implemented)", 'idle'); });
+        if (editToolbarElement) { editToolbarElement.querySelectorAll('.edit-icon').forEach((icon, index) => { icon.addEventListener('click', () => { console.log(`Edit Icon ${index + 1} clicked`); updateFooter(`编辑工具 ${index+1} 未实现 (Edit tool ${index+1} not implemented)`, 'idle'); }); }); }
 
         // --- Initialize WebSocket Connection ---
+        // --- 初始化 WebSocket 连接 ---
         connectWebSocket();
-        updateRenderButtonState(); // Initial button state check
 
-    });
+    }); // End DOMContentLoaded
+
+
+    // --- Global Helper Functions (can be called anytime) ---
+    // --- 全局辅助函数（可随时调用）---
+
+    /** Updates the render button text and disabled state */
+    /** 更新渲染按钮文本和禁用状态 */
+    function updateRenderButtonState() {
+        if (!renderBtn) return; // Exit if button not found / 如果未找到按钮则退出
+
+        const wfSelected = workflowSelect && workflowSelect.value;
+        let buttonText = '';
+        let disabled = true; // Default to disabled / 默认为禁用
+
+        if (!mainSocket || !mainSocket.connected) {
+             buttonText = '连接中 (Connecting)...';
+             disabled = true;
+        } else if (isRendering) {
+             buttonText = '渲染中 (Rendering)...';
+             disabled = true;
+        } else if (!wfSelected) {
+             buttonText = '选择工作流 (Select Workflow)';
+             disabled = true;
+        } else {
+             buttonText = '渲染 (Render)';
+             disabled = false;
+        }
+
+        renderBtn.textContent = buttonText;
+        renderBtn.disabled = disabled;
+    }
 
     </script>
 
