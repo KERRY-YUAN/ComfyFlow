@@ -4,6 +4,8 @@ Flask-SocketIO
 Flask-Cors
 python-socketio[client]
 gevent-websocket
+gevent
+websocket
 Pillow
 numpy
 eventlet # Or gevent, choose one async mode
