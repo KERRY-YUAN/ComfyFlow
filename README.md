@@ -34,7 +34,7 @@ https://github.com/KERRY-YUAN/ComfyFlow/blob/main/static/css/style.css
 @@@@@当前NodeBridge.py节点代码：
 
 20250418-1-反馈：运行后，html”设计工具“界面显示”一直显示“正在连接服务器”
-
+20250418-2-反馈：渲染错误： An unexpected server error occurred: 'str' object has no attribute 'get
 
 
 # V1.6.0，未成功，参考SDPPP逻辑调整，对接comfyui节点输入输出，修改详见内容
